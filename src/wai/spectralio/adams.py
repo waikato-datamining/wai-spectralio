@@ -204,3 +204,27 @@ class Writer(SpectrumWriter):
         else:
             with open(fname, "w") as specfile:
                 self._write(spectra, specfile, False)
+
+
+def read(fname):
+    """
+    Reads the spectra from the specified file.
+
+    :param fname: the file to read
+    :type fname: str
+    :return: the list of spectra
+    :rtype: list
+    """
+    return Reader().read(fname)
+
+
+def write(spectra, fname):
+    """
+    Writes the spectra to the specified file.
+
+    :param spectra: the list of spectra
+    :type spectra: list
+    :param fname: the file to write to
+    :type fname: str
+    """
+    Writer().write(spectra, fname)

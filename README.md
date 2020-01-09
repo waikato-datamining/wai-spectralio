@@ -24,14 +24,14 @@ for sp in sps:
 write(sps, "/somewhere/else/blah.spec.gz")
 ```
 
-If setting options is necessary, you can use the `Reader` and `Writer` and configure them:
+If setting options is necessary, you can use the `Reader` and `Writer` classes and configure them:
 
 ```python
 from wai.spectralio.adams import Reader, Writer
 
 reader = Reader()
 # set potential options
-sps = reader.read("/home/fracpete/temp/dale.specconv/drystekker/OptimisationSet/Source/1NTA100175B19.spec.gz")
+sps = reader.read("/some/where/data.spec.gz")
 for sp in sps:
     print(sp)
     print(sp.waves())
@@ -39,5 +39,5 @@ for sp in sps:
     print(sp.metadata())
 writer = Writer()
 # set potential options
-writer.write(sps, "/home/fracpete/blah.spec.gz")
+writer.write(sps, "/somewhere/else/blah.spec.gz")
 ```

@@ -1,3 +1,5 @@
+# TODO add general option handling
+
 class Spectrum(object):
     """
     Simple container for spectral and meta data.

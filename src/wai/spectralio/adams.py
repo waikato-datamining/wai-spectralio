@@ -7,7 +7,7 @@ SEPARATOR = "---"
 """ the separator between multiple spectra in file. """
 
 COMMENT = "# "
-""" the string for prefixing the meta-data with. """
+""" the string for prefixing the sample data with. """
 
 HEADER = "waveno,amplitude"
 """ the column header. """
@@ -17,6 +17,12 @@ DATATYPE_SUFFIX = "\tDataType"
 
 FIELD_SAMPLE_ID = "Sample ID"
 """ the name of the field storing the sample ID. """
+
+FIELD_INSTRUMENT = "Instrument"
+""" the name of the field storing the instrument name. """
+
+FIELD_FORMAT = "Format"
+""" the name of the field storing the format. """
 
 
 class Reader(SpectrumReader):
@@ -34,27 +40,27 @@ class Reader(SpectrumReader):
         :rtype: list
         """
 
-        # split meta data and spectral data
+        # split sample data and spectral data
         comments = True
-        meta = []
+        sample = []
         data = []
         for i in range(len(lines)):
             if comments and lines[i].startswith(COMMENT):
-                meta.append(lines[i])
+                sample.append(lines[i])
             elif lines[i].startswith(HEADER):
                 comments = False
                 continue
             elif not comments:
                 data.append(lines[i])
 
-        # meta data
-        for i in range(len(meta)):
-            meta[i] = meta[i][2:]
-        props = loads("".join(meta))
+        # sample data
+        for i in range(len(sample)):
+            sample[i] = sample[i][2:]
+        props = loads("".join(sample))
         id = "noid"
         if FIELD_SAMPLE_ID in props:
             id = str(props[FIELD_SAMPLE_ID])
-        metadata = {}
+        sampledata = {}
         for k in props:
             if k.endswith(DATATYPE_SUFFIX):
                 continue
@@ -63,11 +69,15 @@ class Reader(SpectrumReader):
             if k + DATATYPE_SUFFIX in props:
                 t = props[k + DATATYPE_SUFFIX]
             if t == "N":
-                metadata[k] = float(v)
+                sampledata[k] = float(v)
             elif t == "B":
-                metadata[k] = bool(v)
+                sampledata[k] = bool(v)
             else:
-                metadata[k] = str(v)
+                sampledata[k] = str(v)
+        if FIELD_INSTRUMENT not in sampledata:
+            sampledata[FIELD_INSTRUMENT] = self._options_parsed.instrument
+        if not self._options_parsed.keep_format:
+            sampledata[FIELD_FORMAT] = self._options_parsed.format
 
         # spectral data
         waves = []
@@ -78,7 +88,7 @@ class Reader(SpectrumReader):
                 waves.append(float(wave))
                 ampls.append(float(ampl))
 
-        return Spectrum(id, waves, ampls, metadata)
+        return Spectrum(id, waves, ampls, sampledata)
 
     def _read(self, specfile):
         """
@@ -131,6 +141,19 @@ class Writer(SpectrumWriter):
     Writer for ADAMS spectra.
     """
 
+    def _define_options(self):
+        """
+        Configures the options parser.
+
+        :return: the option parser
+        :rtype: argparse.ArgumentParser
+        """
+
+        result = super(Writer, self)._define_options()
+        result.add_argument('--output_sampledata', action='store_true', help='whether to output the sample data as well')
+
+        return result
+
     def _write(self, spectra, specfile, as_bytes):
         """
         Writes the spectra to the filehandle.
@@ -148,30 +171,31 @@ class Writer(SpectrumWriter):
             if not first:
                 specfile.write(SEPARATOR + "\n")
 
-            # prefix meta-data with '# '
-            props = Properties()
-            for k in spectrum.metadata():
-                v = spectrum.metadata()[k]
-                props[k] = str(v)
-                if isinstance(v, int) or isinstance(v, float):
-                    props[k + DATATYPE_SUFFIX] = "N"
-                elif isinstance(v, bool):
-                    props[k + DATATYPE_SUFFIX] = "B"
-                elif isinstance(v, str):
-                    props[k + DATATYPE_SUFFIX] = "S"
-                else:
-                    props[k + DATATYPE_SUFFIX] = "U"
-            metastr = dumps(props)
-            lines = metastr.split("\n")
-            for i in range(len(lines)):
-                lines[i] = COMMENT + lines[i]
+            if self._options_parsed.output_sampledata:
+                # prefix sample data with '# '
+                props = Properties()
+                for k in spectrum.sampledata:
+                    v = spectrum.sampledata[k]
+                    props[k] = str(v)
+                    if isinstance(v, int) or isinstance(v, float):
+                        props[k + DATATYPE_SUFFIX] = "N"
+                    elif isinstance(v, bool):
+                        props[k + DATATYPE_SUFFIX] = "B"
+                    elif isinstance(v, str):
+                        props[k + DATATYPE_SUFFIX] = "S"
+                    else:
+                        props[k + DATATYPE_SUFFIX] = "U"
+                samplestr = dumps(props)
+                lines = samplestr.split("\n")
+                for i in range(len(lines)):
+                    lines[i] = COMMENT + lines[i]
 
-            # meta-data
-            for line in lines:
-                if as_bytes:
-                    specfile.write((line + "\n").encode())
-                else:
-                    specfile.write(line + "\n")
+                # sample data
+                for line in lines:
+                    if as_bytes:
+                        specfile.write((line + "\n").encode())
+                    else:
+                        specfile.write(line + "\n")
 
             # header
             if as_bytes:
@@ -182,9 +206,9 @@ class Writer(SpectrumWriter):
             # spectral data
             for i in range(len(spectrum)):
                 if as_bytes:
-                    specfile.write(("%s,%s\n" % (spectrum.waves()[i], spectrum.amplitudes()[i])).encode())
+                    specfile.write(("%s,%s\n" % (spectrum.waves[i], spectrum.amplitudes[i])).encode())
                 else:
-                    specfile.write("%s,%s\n" % (spectrum.waves()[i], spectrum.amplitudes()[i]))
+                    specfile.write("%s,%s\n" % (spectrum.waves[i], spectrum.amplitudes[i]))
 
             first = False
 
@@ -206,19 +230,24 @@ class Writer(SpectrumWriter):
                 self._write(spectra, specfile, False)
 
 
-def read(fname):
+def read(fname, options=None):
     """
     Reads the spectra from the specified file.
 
     :param fname: the file to read
     :type fname: str
+    :param options: the options to use
+    :type options: dict
     :return: the list of spectra
     :rtype: list
     """
-    return Reader().read(fname)
+    reader = Reader()
+    if options is not None:
+        reader.options = options
+    return reader.read(fname)
 
 
-def write(spectra, fname):
+def write(spectra, fname, options=None):
     """
     Writes the spectra to the specified file.
 
@@ -226,5 +255,10 @@ def write(spectra, fname):
     :type spectra: list
     :param fname: the file to write to
     :type fname: str
+    :param options: the options to use
+    :type options: dict
     """
-    Writer().write(spectra, fname)
+    writer = Writer()
+    if options is not None:
+        writer.options = options
+    writer.write(spectra, fname)

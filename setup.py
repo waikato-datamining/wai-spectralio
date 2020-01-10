@@ -37,7 +37,6 @@ setup(
         "wai"
     ],
     install_requires=[
-        "jcamp",
         "javaproperties",
     ],
     version="0.0.1",

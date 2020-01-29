@@ -135,3 +135,6 @@ idea/
 *.bak
 *.swp
 blah.py
+
+corey/
+.idea/

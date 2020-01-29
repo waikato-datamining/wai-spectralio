@@ -1,5 +1,3 @@
-import gzip
-
 from .api import Spectrum, SpectrumReader, SpectrumWriter
 from .sampleidextraction import SampleIDExtraction
 
@@ -47,22 +45,8 @@ class Reader(SampleIDExtraction, SpectrumReader):
 
         return [Spectrum(sample_id, waves, ampls, {})]
 
-    def read(self, fname):
-        """
-        Reads the spectra from the specified file.
-
-        :param fname: the file to read
-        :type fname: str
-        :return: the list of spectra
-        :rtype: list
-        """
-
-        if fname.endswith(".gz"):
-            with gzip.open(fname, "rb") as specfile:
-                return self._read(specfile, fname)
-        else:
-            with open(fname, "r") as specfile:
-                return self._read(specfile, fname)
+    def binary_mode(self, filename: str) -> bool:
+        return False
 
 
 class Writer(SpectrumWriter):
@@ -83,7 +67,7 @@ class Writer(SpectrumWriter):
 
         return result
 
-    def _write(self, spectra, specfile):
+    def _write(self, spectra, specfile, as_bytes):
         """
         Writes the spectra to the filehandle.
 
@@ -100,53 +84,11 @@ class Writer(SpectrumWriter):
         for wave, ampl in reversed(list(zip(spectrum.waves, spectrum.amplitudes))):
             specfile.write(f"{wave}{self._options_parsed.separator}{ampl}\n")
 
-    def write(self, spectra, fname):
-        """
-        Writes the spectra to the specified file.
-
-        :param spectra: the list of spectra
-        :type spectra: list
-        :param fname: the file to write to
-        :type fname: str
-        """
-
-        if fname.endswith(".gz"):
-            with gzip.open(fname, "wt") as specfile:
-                self._write(spectra, specfile)
-        else:
-            with open(fname, "w") as specfile:
-                self._write(spectra, specfile)
+    def binary_mode(self, filename: str) -> bool:
+        return False
 
 
-def read(fname, options=None):
-    """
-    Reads the spectra from the specified file.
-
-    :param fname: the file to read
-    :type fname: str
-    :param options: the options to use
-    :type options: dict
-    :return: the list of spectra
-    :rtype: list
-    """
-    reader = Reader()
-    if options is not None:
-        reader.options = options
-    return reader.read(fname)
+read = Reader.read
 
 
-def write(spectra, fname, options=None):
-    """
-    Writes the spectra to the specified file.
-
-    :param spectra: the list of spectra
-    :type spectra: list
-    :param fname: the file to write to
-    :type fname: str
-    :param options: the options to use
-    :type options: dict
-    """
-    writer = Writer()
-    if options is not None:
-        writer.options = options
-    writer.write(spectra, fname)
+write = Writer.write

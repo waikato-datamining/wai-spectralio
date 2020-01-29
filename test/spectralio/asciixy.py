@@ -44,6 +44,6 @@ class WriterTest(AbstractTest):
         spec = Reader().read(filename)
 
         mem_file = StringIO()
-        subject._write(spec, mem_file)
+        subject._write(spec, mem_file, False)
 
         return {"write": mem_file}

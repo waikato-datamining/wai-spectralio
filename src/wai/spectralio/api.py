@@ -1,4 +1,8 @@
 import argparse
+import gzip
+from typing import AnyStr, IO
+
+from .util import instanceoptionalmethod
 
 
 class Spectrum(object):
@@ -161,20 +165,58 @@ class OptionHandler(object):
         return self._options_parser.format_help()
 
 
-class SpectrumReader(OptionHandler):
+class SpectrumIOBase(OptionHandler):
+    """
+    Base class for spectrum readers and writers.
+    """
+    def _define_options(self):
+        """
+        Configures the options parser.
+
+        :return: the option parser
+        :rtype: argparse.ArgumentParser
+        """
+
+        result = super()._define_options()
+        result.add_argument('--debug', action='store_true', help='whether to turn debugging output on')
+
+        return result
+
+    def binary_mode(self, filename: str) -> bool:
+        """
+        Whether the file should be accessed in binary mode.
+
+        :param filename:    The name of the file.
+        :return:            True if it should be accessed in binary mode,
+                            False if not.
+        """
+        raise NotImplementedError(SpectrumIOBase.binary_mode.__qualname__)
+
+    def open(self, filename: str, mode: str) -> IO[AnyStr]:
+        """
+        Opens the given file in the given mode.
+
+        :param filename:    The file to open.
+        :param mode:        'r' for read or 'w' for write.
+        :return:            The file handle.
+        """
+        # Make sure mode is either 'r' or 'w'
+        if mode not in {'r', 'w', 'R', 'W'}:
+            raise ValueError(f"Mode must be 'r' or 'w', not '{mode}'")
+        mode = mode.lower()
+
+        if filename.endswith(".gz"):
+            mode = mode if self.binary_mode(filename) else f"{mode}t"
+            return gzip.open(filename, mode)
+        else:
+            mode = f"{mode}b" if self.binary_mode(filename) else mode
+            return open(filename, mode)
+
+
+class SpectrumReader(SpectrumIOBase):
     """
     Ancestor for spectrum readers.
     """
-
-    def __init__(self, options=None):
-        """
-        Initializes the reader.
-
-        :param options: the options to use
-        :type options: dict
-        """
-        super(SpectrumReader, self).__init__(options=options)
-
     def _define_options(self):
         """
         Configures the options parser.
@@ -184,54 +226,60 @@ class SpectrumReader(OptionHandler):
         """
 
         result = super(SpectrumReader, self)._define_options()
-        result.add_argument('--debug', action='store_true', help='whether to turn debugging output on')
         result.add_argument('--instrument', type=str, help='the instrument name', default="unknown")
         result.add_argument('--format', type=str, help='the format type', default="NIR")
         result.add_argument('--keep_format', action='store_true', help='whether to not override the format obtained from the file')
 
         return result
 
-    def read(self, fname):
+    @instanceoptionalmethod
+    def read(self, fname, options=None):
         """
         Reads the spectra from the specified file.
 
         :param fname: the file to read
         :type fname: str
+        :param options: the options to use
+        :type options: dict
         :return: the list of spectra
         :rtype: list
         """
+        # If called by class, create an instance
+        if not instanceoptionalmethod.is_instance(self):
+            self = self()
 
-        raise NotImplemented()
+        # Apply the override options if given
+        old_options = self.options
+        if options is not None:
+            self.options = options
+
+        try:
+            with self.open(fname, 'r') as specfile:
+                return self._read(specfile, fname)
+        finally:
+            if options is not None:
+                self.options = old_options
+
+    def _read(self, specfile, fname):
+        """
+        Reads the spectra from the file handle.
+
+        :param specfile: the file handle to read from
+        :type specfile: file
+        :param fname: the file being read
+        :type fname: str
+        :return: the list of spectra
+        :rtype: list
+        """
+        raise NotImplementedError(SpectrumReader._read.__qualname__)
 
 
-class SpectrumWriter(OptionHandler):
+class SpectrumWriter(SpectrumIOBase):
     """
     Ancestor for spectrum readers.
     """
-
-    def __init__(self, options=None):
-        """
-        Initializes the reader.
-
-        :param options: the options to use
-        :type options: dict
-        """
-        super(SpectrumWriter, self).__init__(options=options)
-
-    def _define_options(self):
-        """
-        Configures the options parser.
-
-        :return: the option parser
-        :rtype: argparse.ArgumentParser
-        """
-
-        result = super(SpectrumWriter, self)._define_options()
-        result.add_argument('--debug', action='store_true', help='whether to turn debugging output on')
-
-        return result
-
-    def write(self, spectra, fname):
+    @instanceoptionalmethod
+    def write(self, spectra, fname, options=None):
         """
         Writes the spectra to the specified file.
 
@@ -239,6 +287,35 @@ class SpectrumWriter(OptionHandler):
         :type spectra: list
         :param fname: the file to write to
         :type fname: str
+        :param options: the options to use
+        :type options: dict
+        """
+        # If called by class, create an instance
+        if not instanceoptionalmethod.is_instance(self):
+            self = self()
+
+        # Apply the override options if given
+        old_options = self.options
+        if options is not None:
+            self.options = options
+
+        try:
+            with self.open(fname, 'w') as specfile:
+                return self._write(spectra, specfile, self.binary_mode(fname))
+        finally:
+            if options is not None:
+                self.options = old_options
+
+    def _write(self, spectra, specfile, as_bytes):
+        """
+        Writes the spectra to the filehandle.
+
+        :param spectra: the list of spectra
+        :type spectra: list
+        :param specfile: the file handle to use
+        :type specfile: file
+        :param as_bytes: whether to write as bytes or string
+        :type as_bytes: bool
         """
 
         raise NotImplemented()

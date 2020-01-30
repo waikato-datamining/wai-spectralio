@@ -152,11 +152,17 @@ class Writer(SpectrumWriter):
         :param as_bytes: whether to write as bytes or string
         :type as_bytes: bool
         """
+        # Create a writing function which handles the as_bytes argument
+        if as_bytes:
+            def write(string: str):
+                specfile.write(string.encode())
+        else:
+            write = specfile.write
 
         first = True
         for spectrum in spectra:
             if not first:
-                specfile.write(SEPARATOR + "\n")
+                write(SEPARATOR + "\n")
 
             if self._options_parsed.output_sampledata:
                 # prefix sample data with '# '
@@ -179,23 +185,14 @@ class Writer(SpectrumWriter):
 
                 # sample data
                 for line in lines:
-                    if as_bytes:
-                        specfile.write((line + "\n").encode())
-                    else:
-                        specfile.write(line + "\n")
+                    write(line + "\n")
 
             # header
-            if as_bytes:
-                specfile.write((HEADER + "\n").encode())
-            else:
-                specfile.write(HEADER + "\n")
+            write(HEADER + "\n")
 
             # spectral data
             for i in range(len(spectrum)):
-                if as_bytes:
-                    specfile.write(("%s,%s\n" % (spectrum.waves[i], spectrum.amplitudes[i])).encode())
-                else:
-                    specfile.write("%s,%s\n" % (spectrum.waves[i], spectrum.amplitudes[i]))
+                write("%s,%s\n" % (spectrum.waves[i], spectrum.amplitudes[i]))
 
             first = False
 

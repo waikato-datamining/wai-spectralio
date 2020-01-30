@@ -18,7 +18,11 @@ def with_locale(locale_to_use: str, category: int = locale.LC_NUMERIC):
             saved_locale = locale.getlocale(category)
 
             # Set the locale
-            locale.setlocale(category, locale_to_use)
+            try:
+                locale.setlocale(category, (locale_to_use, "UTF-8"))
+            except locale.Error as e:
+                e.args = *e.args, locale_to_use
+                raise
 
             try:
                 return function(*args, **kwargs)

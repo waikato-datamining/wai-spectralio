@@ -1,28 +1,17 @@
 import os
 import re
 
-from ..api import OptionHandler
+from ..options import OptionHandler, Option
 
 
 class SampleIDExtraction(OptionHandler):
     """
     Mixin for schemes that extract the sample ID from the filename.
     """
-    def _define_options(self):
-        """
-        Configures the options parser.
-
-        :return: the option parser
-        :rtype: argparse.ArgumentParser
-        """
-        result = super()._define_options()
-        result.add_argument('--sample-id-extraction',
-                            required=False,
-                            nargs=2,
-                            help='the scheme for extracting the sample ID from the filename',
-                            dest='sample_id_extraction')
-
-        return result
+    # Options
+    sample_id_extraction = Option(required=False,
+                                  nargs=2,
+                                  help='the scheme for extracting the sample ID from the filename')
 
     def _check(self, file: str):
         """
@@ -40,7 +29,7 @@ class SampleIDExtraction(OptionHandler):
         :param file:    The current file.
         :return:        The extracted sample ID.
         """
-        extraction_option = self._options_parsed.sample_id_extraction
+        extraction_option = self.sample_id_extraction
 
         if extraction_option is None:
             return self._filename(file)

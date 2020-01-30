@@ -1,1 +1,2 @@
-from .asciixy import ReaderTest, WriterTest
+from .asc import ASCReaderTest, ASCWriterTest
+from .asciixy import ASCIIXYReaderTest, ASCIIXYWriterTest

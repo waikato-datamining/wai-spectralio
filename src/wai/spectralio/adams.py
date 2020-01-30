@@ -1,6 +1,9 @@
-from wai.spectralio.api import Spectrum, SpectrumReader, SpectrumWriter
+from typing import Type
+
 from javaproperties import Properties, dumps, loads
 
+from .api import Spectrum, SpectrumReader, SpectrumWriter
+from .options import Option
 
 SEPARATOR = "---"
 """ the separator between multiple spectra in file. """
@@ -74,9 +77,9 @@ class Reader(SpectrumReader):
             else:
                 sampledata[k] = str(v)
         if FIELD_INSTRUMENT not in sampledata:
-            sampledata[FIELD_INSTRUMENT] = self._options_parsed.instrument
-        if not self._options_parsed.keep_format:
-            sampledata[FIELD_FORMAT] = self._options_parsed.format
+            sampledata[FIELD_INSTRUMENT] = self.instrument
+        if not self.keep_format:
+            sampledata[FIELD_FORMAT] = self.format
 
         # spectral data
         waves = []
@@ -122,24 +125,17 @@ class Reader(SpectrumReader):
     def binary_mode(self, filename: str) -> bool:
         return filename.endswith(".gz")
 
+    @classmethod
+    def get_writer_class(cls) -> 'Type[Writer]':
+        return Writer
+
 
 class Writer(SpectrumWriter):
     """
     Writer for ADAMS spectra.
     """
-
-    def _define_options(self):
-        """
-        Configures the options parser.
-
-        :return: the option parser
-        :rtype: argparse.ArgumentParser
-        """
-
-        result = super(Writer, self)._define_options()
-        result.add_argument('--output_sampledata', action='store_true', help='whether to output the sample data as well')
-
-        return result
+    # Options
+    output_sampledata = Option(action='store_true', help='whether to output the sample data as well')
 
     def _write(self, spectra, specfile, as_bytes):
         """
@@ -198,6 +194,10 @@ class Writer(SpectrumWriter):
 
     def binary_mode(self, filename: str) -> bool:
         return filename.endswith(".gz")
+
+    @classmethod
+    def get_reader_class(cls) -> Type[Reader]:
+        return Reader
 
 
 read = Reader.read

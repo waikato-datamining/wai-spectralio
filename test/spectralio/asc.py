@@ -1,24 +1,24 @@
 import os
-from wai.spectralio.asciixy import Reader, Writer
+from wai.spectralio.asc import Reader, Writer
 
 from .base import SpectrumReaderTest, SpectrumWriterTest
 
 
-class ASCIIXYReaderTest(SpectrumReaderTest):
+class ASCReaderTest(SpectrumReaderTest):
     @classmethod
     def subject_type(cls):
         return Reader
 
     @classmethod
     def get_example_filename(cls) -> str:
-        return os.path.join("resources", "data", "1382928.txt")
+        return os.path.join("resources", "data", "146048-NIR-FOSS.asc")
 
 
-class ASCIIXYWriterTest(SpectrumWriterTest):
+class ASCWriterTest(SpectrumWriterTest):
     @classmethod
     def subject_type(cls):
         return Writer
 
     @classmethod
     def get_example_filename(cls) -> str:
-        return os.path.join("resources", "data", "1382928.txt")
+        return os.path.join("resources", "data", "146048-NIR-FOSS.asc")

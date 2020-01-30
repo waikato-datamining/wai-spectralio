@@ -1,8 +1,8 @@
-import argparse
 import gzip
 import logging
-from typing import AnyStr, IO
+from typing import AnyStr, IO, Type
 
+from .options import OptionHandler, Option
 from .util import instanceoptionalmethod, dynamic_default
 
 
@@ -122,87 +122,12 @@ class LoggingObject:
         return logging.getLogger(cls.__module__ + "." + cls.__name__)
 
 
-class OptionHandler(object):
-    """
-    Super class for option-handling classes.
-    """
-
-    def __init__(self, options=None):
-        """
-        Initializes the reader.
-
-        :param options: the options to use
-        :type options: dict
-        """
-        super(OptionHandler, self).__init__()
-        self._options_parser = self._define_options()
-        self._options_parsed = argparse.Namespace()
-        self._options_list = None
-        # now initialize options/namespace
-        self.options = options
-
-    def _define_options(self):
-        """
-        Configures the options parser.
-
-        :return: the option parser
-        :rtype: argparse.ArgumentParser
-        """
-
-        result = argparse.ArgumentParser(description=self.__class__.__module__ + "." + self.__class__.__name__)
-
-        return result
-
-    @property
-    def options(self):
-        """
-        Returns the currently used options.
-
-        :return: the list of options (strings)
-        :rtype: list
-        """
-        return self._options_list
-
-    @options.setter
-    def options(self, options):
-        """
-        Sets the options to use.
-
-        :param options: the list of options, can be None
-        :type options: list
-        """
-        if (options is None) or (len(options) == 0):
-            self._options_parsed = self._options_parser.parse_args([])
-        else:
-            self._options_parsed = self._options_parser.parse_args(options)
-        self._options_list = ([] if options is None else options.copy())
-
-    def options_help(self):
-        """
-        Returns the help for the options.
-
-        :return: the help
-        :rtype: str
-        """
-        return self._options_parser.format_help()
-
-
 class SpectrumIOBase(OptionHandler, LoggingObject):
     """
     Base class for spectrum readers and writers.
     """
-    def _define_options(self):
-        """
-        Configures the options parser.
-
-        :return: the option parser
-        :rtype: argparse.ArgumentParser
-        """
-
-        result = super()._define_options()
-        result.add_argument('--debug', action='store_true', help='whether to turn debugging output on')
-
-        return result
+    # Debug option
+    debug = Option(action='store_true', help='whether to turn debugging output on')
 
     def binary_mode(self, filename: str) -> bool:
         """
@@ -239,20 +164,11 @@ class SpectrumReader(SpectrumIOBase):
     """
     Ancestor for spectrum readers.
     """
-    def _define_options(self):
-        """
-        Configures the options parser.
 
-        :return: the option parser
-        :rtype: argparse.ArgumentParser
-        """
-
-        result = super(SpectrumReader, self)._define_options()
-        result.add_argument('--instrument', type=str, help='the instrument name', default="unknown")
-        result.add_argument('--format', type=str, help='the format type', default="NIR")
-        result.add_argument('--keep_format', action='store_true', help='whether to not override the format obtained from the file')
-
-        return result
+    # Options
+    instrument = Option(type=str, help='the instrument name', default="unknown")
+    format = Option(type=str, help='the format type', default="NIR")
+    keep_format = Option(action='store_true', help='whether to not override the format obtained from the file')
 
     @instanceoptionalmethod
     def read(self, fname, options=None):
@@ -294,6 +210,16 @@ class SpectrumReader(SpectrumIOBase):
         :rtype: list
         """
         raise NotImplementedError(SpectrumReader._read.__qualname__)
+
+    @classmethod
+    def get_writer_class(cls) -> 'Type[SpectrumWriter]':
+        """
+        Gets the writer class that writes the same file-type as
+        this reader class reads.
+
+        :return:    The writer.
+        """
+        raise NotImplementedError(SpectrumReader.get_writer_class.__qualname__)
 
 
 class SpectrumWriter(SpectrumIOBase):
@@ -340,4 +266,14 @@ class SpectrumWriter(SpectrumIOBase):
         :type as_bytes: bool
         """
 
-        raise NotImplemented()
+        raise NotImplementedError(SpectrumWriter._write.__qualname__)
+
+    @classmethod
+    def get_reader_class(cls) -> Type[SpectrumReader]:
+        """
+        Gets the reader class that reads the same file-type as
+        this writer class writes.
+
+        :return:    The reader class.
+        """
+        raise NotImplementedError(SpectrumWriter.get_reader_class.__qualname__)

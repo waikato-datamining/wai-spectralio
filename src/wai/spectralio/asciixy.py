@@ -1,4 +1,7 @@
+from typing import Type
+
 from .api import Spectrum, SpectrumReader, SpectrumWriter
+from .options import Option
 from .sampleidextraction import SampleIDExtraction
 
 
@@ -6,18 +9,8 @@ class Reader(SampleIDExtraction, SpectrumReader):
     """
     Reader for ADAMS spectra.
     """
-    def _define_options(self):
-        """
-        Configures the options parser.
-
-        :return: the option parser
-        :rtype: argparse.ArgumentParser
-        """
-
-        result = super()._define_options()
-        result.add_argument('--separator', help='the separator to use for identifying X and Y columns', default=';')
-
-        return result
+    # Options
+    separator = Option(help='the separator to use for identifying X and Y columns', default=';')
 
     def _read(self, specfile, fname):
         """
@@ -38,7 +31,7 @@ class Reader(SampleIDExtraction, SpectrumReader):
             if len(line) == 0:
                 continue
 
-            parts = line.split(self._options_parsed.separator)
+            parts = line.split(self.separator)
 
             waves.append(float(parts[0]))
             ampls.append(float(parts[1]))
@@ -48,24 +41,17 @@ class Reader(SampleIDExtraction, SpectrumReader):
     def binary_mode(self, filename: str) -> bool:
         return False
 
+    @classmethod
+    def get_writer_class(cls) -> 'Type[Writer]':
+        return Writer
+
 
 class Writer(SpectrumWriter):
     """
     Writer for ADAMS spectra.
     """
-
-    def _define_options(self):
-        """
-        Configures the options parser.
-
-        :return: the option parser
-        :rtype: argparse.ArgumentParser
-        """
-
-        result = super()._define_options()
-        result.add_argument('--separator', help='the separator to use for identifying X and Y columns', default=';')
-
-        return result
+    # Options
+    separator = Option(help='the separator to use for identifying X and Y columns', default=';')
 
     def _write(self, spectra, specfile, as_bytes):
         """
@@ -82,10 +68,13 @@ class Writer(SpectrumWriter):
         spectrum = spectra[0]
 
         for wave, ampl in reversed(list(zip(spectrum.waves, spectrum.amplitudes))):
-            specfile.write(f"{wave}{self._options_parsed.separator}{ampl}\n")
+            specfile.write(f"{wave}{self.separator}{ampl}\n")
 
     def binary_mode(self, filename: str) -> bool:
         return False
+
+    def get_reader_class(cls) -> Type[Reader]:
+        return Reader
 
 
 read = Reader.read

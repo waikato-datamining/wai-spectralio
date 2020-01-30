@@ -1,8 +1,9 @@
 import locale
 import re
-from typing import Dict, Optional, List, Tuple
+from typing import Dict, Optional, List, Tuple, Type
 
 from .api import LoggingObject, SpectrumReader, SpectrumWriter, Spectrum
+from .options import Option
 from .util import with_locale
 
 # The prefix string specifying a comment
@@ -113,11 +114,7 @@ class Reader(SpectrumReader):
     """
     Reads spectra in BLGG ASC format.
     """
-    def _define_options(self):
-        result = super()._define_options()
-        result.add_argument("--locale", help="the locale to use for parsing the numbers", default="en_US")
-
-        return result
+    locale = Option(help="the locale to use for parsing the numbers", default="en_US")
 
     def _fix_key(self, key: str) -> str:
         """
@@ -133,7 +130,7 @@ class Reader(SpectrumReader):
 
     def _read(self, specfile, fname):
         pf = ParsedFile()
-        pf.parse_with_locale(specfile.read(), self._options_parsed.locale)
+        pf.parse_with_locale(specfile.read(), self.locale)
 
         # NIR list
         nir = pf.get_NIR_list()
@@ -152,24 +149,25 @@ class Reader(SpectrumReader):
     def binary_mode(self, filename: str) -> bool:
         return False
 
+    @classmethod
+    def get_writer_class(cls) -> 'Type[Writer]':
+        return Writer
+
 
 class Writer(SpectrumWriter):
     """
     Writer that stores spectrums in the BLGG ASC format.
     """
-    def _define_options(self):
-        result = super()._define_options()
-        result.add_argument("--instrument-name", help="Instrument Name to be used in ASC header", default="<not implemented>")
-        result.add_argument("--accessory-name", help="Accessory Name to be used in ASC header", default="ABB-BOMEM MB160D")
-        result.add_argument("--product-code", help="either the attribute name with the product code in it, or the actual product code to be used", default="01")
-        result.add_argument("--product-code-from-field", help="Whether to use the product code as the attribute name containing the actual product code", action="store_true")
-        result.add_argument("--data-points", help="number of data points. -1 means use as many as in spectrum", type=int, default=-1)
-        result.add_argument("--first-x-point", help="first wavenumber", type=float, default=3749.3428948242)
-        result.add_argument("--last-x-point", help="last wavenumber", type=float, default=9998.2477195313)
-        result.add_argument("--descending", help="if set to true, the spectrum is output in descending x-axis order", action="store_true")
-        result.add_argument("--locale", help="the locale to use for parsing the numbers", default="en_US")
-
-        return result
+    # Options
+    instrument_name = Option(help="Instrument Name to be used in ASC header", default="<not implemented>")
+    accessory_name = Option(help="Accessory Name to be used in ASC header", default="ABB-BOMEM MB160D")
+    product_code = Option(help="either the attribute name with the product code in it, or the actual product code to be used", default="01")
+    product_code_from_field = Option(help="Whether to use the product code as the attribute name containing the actual product code", action="store_true")
+    data_points = Option(help="number of data points. -1 means use as many as in spectrum", type=int, default=-1)
+    first_x_point = Option(help="first wavenumber", type=float, default=3749.3428948242)
+    last_x_point = Option(help="last wavenumber", type=float, default=9998.2477195313)
+    descending = Option(help="if set to true, the spectrum is output in descending x-axis order", action="store_true")
+    locale = Option(help="the locale to use for parsing the numbers", default="en_US")
 
     def gen_product_code(self, data: Spectrum) -> str:
         """
@@ -178,8 +176,8 @@ class Writer(SpectrumWriter):
         :param data:    The spectrum.
         :return:        The product code.
         """
-        product_code = self._options_parsed.product_code
-        if self._options_parsed.product_code_from_field:
+        product_code = self.product_code
+        if self.product_code_from_field:
             if data.sampledata is None:
                 return "<Report Not Available"
 
@@ -206,7 +204,7 @@ class Writer(SpectrumWriter):
         :param data:    The spectrum.
         :return:        The number of data-points.
         """
-        points = self._options_parsed.nr_datapoints
+        points = self.data_points
 
         if points == -1:
             return len(data)
@@ -229,7 +227,7 @@ class Writer(SpectrumWriter):
         datapoints = [(wave, ampl) for wave, ampl in zip(data.waves, data.amplitudes)]
 
         # Sort them
-        datapoints.sort(key=lambda pair: pair[0], reverse=self._options_parsed.descending)
+        datapoints.sort(key=lambda pair: pair[0], reverse=self.descending)
 
         return datapoints
 
@@ -240,26 +238,27 @@ class Writer(SpectrumWriter):
         :param data:    The data to write.
         :return:        ASC file as a string.
         """
-        ret = (f"{COMMENT} Instrument Name = {self._options_parsed.instrument_name}\n"
-               f"{COMMENT} Accessory Name = {self._options_parsed.accessory_name}\n"
+        ret = (f"{COMMENT} Instrument Name = {self.instrument_name}\n"
+               f"{COMMENT} Accessory Name = {self.accessory_name}\n"
                f"{COMMENT} Product Name = {self.gen_product_code(data)}\n"
                f"{COMMENT} Sample ID = {self.gen_sample_id(data)}\n")
 
         points = self.gen_num_datapoints(data)
 
         ret += (f"{COMMENT} Nr of data points = {points}\n"
-                f"{COMMENT} First X Point = {self._options_parsed.first_x_point}\n"
-                f"{COMMENT} Last X Point = {self._options_parsed.last_x_point}\n"
+                f"{COMMENT} First X Point = {self.first_x_point}\n"
+                f"{COMMENT} Last X Point = {self.last_x_point}\n"
                 f"{COMMENT} Wave number - Absorbance value\n")
 
-        nf = with_locale(self._options_parsed.locale)(locale.atof)
+        nf = with_locale(self.locale)(locale.str)
 
         vsp = self.get_sorted_datapoints(data)
 
-        currwn = self._options_parsed.first_x_point
-        diff = (self._options_parsed.last_x_point - currwn) / (points - 1)
+        currwn = self.first_x_point
+        diff = (self.last_x_point - currwn) / (points - 1)
         for point in vsp:
             ret += f"{nf(currwn)} {nf(point[1])}\n"
+            currwn += diff
 
         return ret
 
@@ -278,6 +277,13 @@ class Writer(SpectrumWriter):
             raise ValueError("Writer can only write exactly 1 spectrum at a time!")
 
         specfile.write(self.gen_ASC_string(spectra[0]))
+
+    def binary_mode(self, filename: str) -> bool:
+        return False
+
+    @classmethod
+    def get_reader_class(cls) -> Type[Reader]:
+        return Reader
 
 
 read = Reader.read

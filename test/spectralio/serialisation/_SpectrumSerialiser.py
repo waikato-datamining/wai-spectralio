@@ -29,7 +29,7 @@ class SpectrumSerialiser(RegressionSerialiser[Spectrum]):
         # Write the sample data
         for key, value in result.sampledata.items():
             value = f"'{value}'" if isinstance(value, str) else str(value)
-            file.write(f"s {key}={value}")
+            file.write(f"s {key}={value}\n")
 
     @classmethod
     def deserialise(cls, file: IO[str]) -> Spectrum:

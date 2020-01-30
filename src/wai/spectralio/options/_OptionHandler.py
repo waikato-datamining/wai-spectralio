@@ -65,9 +65,14 @@ class OptionHandler(object):
         :param other:   The other option handler.
         :return:        The set of common option names.
         """
-        common_options = []
+        # Get the other's options, keyed by name
+        other_options = {option.name: option for option in other._get_all_options()}
 
-
+        # Return all option names which refer to identical options
+        return {option.name
+                for option in cls._get_all_options()
+                if option.name in other_options
+                and other_options[option.name] == option}
 
     @dynamic_default(list, "options")
     def __init__(self, options=None):

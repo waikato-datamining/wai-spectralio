@@ -58,7 +58,7 @@ class OptionHandler(object):
         return (option.name for option in cls._get_all_options())
 
     @classmethod
-    def get_common_options(cls, other: Type['OptionHandler']) -> Set[str]:
+    def get_common_options(cls, other: Type['OptionHandler']) -> Iterator[str]:
         """
         Gets the options common to this handler and another.
 
@@ -69,10 +69,10 @@ class OptionHandler(object):
         other_options = {option.name: option for option in other._get_all_options()}
 
         # Return all option names which refer to identical options
-        return {option.name
+        return (option.name
                 for option in cls._get_all_options()
                 if option.name in other_options
-                and other_options[option.name] == option}
+                and other_options[option.name] == option)
 
     @dynamic_default(list, "options")
     def __init__(self, options=None):

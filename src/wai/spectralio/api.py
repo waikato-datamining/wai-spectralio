@@ -48,6 +48,15 @@ class Spectrum(object):
 
         return self._id
 
+    @id.setter
+    def id(self, value: str):
+        """
+        Sets the sample ID.
+
+        :param value:   The new sample ID.
+        """
+        self._id = value
+
     @property
     def waves(self):
         """

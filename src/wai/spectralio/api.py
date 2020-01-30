@@ -1,5 +1,6 @@
 import argparse
 import gzip
+import logging
 from typing import AnyStr, IO
 
 from .util import instanceoptionalmethod, dynamic_default
@@ -111,6 +112,16 @@ class Spectrum(object):
         return self.id + ": #points=" + str(len(self))
 
 
+class LoggingObject:
+    """
+    Mixin class for adding logging to objects.
+    """
+    @property
+    def logger(self) -> logging.Logger:
+        cls = type(self)
+        return logging.getLogger(cls.__module__ + "." + cls.__name__)
+
+
 class OptionHandler(object):
     """
     Super class for option-handling classes.
@@ -176,7 +187,7 @@ class OptionHandler(object):
         return self._options_parser.format_help()
 
 
-class SpectrumIOBase(OptionHandler):
+class SpectrumIOBase(OptionHandler, LoggingObject):
     """
     Base class for spectrum readers and writers.
     """

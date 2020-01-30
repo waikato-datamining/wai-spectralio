@@ -278,3 +278,9 @@ class Writer(SpectrumWriter):
             raise ValueError("Writer can only write exactly 1 spectrum at a time!")
 
         specfile.write(self.gen_ASC_string(spectra[0]))
+
+
+read = Reader.read
+
+
+write = Writer.write

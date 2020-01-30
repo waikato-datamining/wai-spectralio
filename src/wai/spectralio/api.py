@@ -2,15 +2,17 @@ import argparse
 import gzip
 from typing import AnyStr, IO
 
-from .util import instanceoptionalmethod
+from .util import instanceoptionalmethod, dynamic_default
 
 
 class Spectrum(object):
     """
     Simple container for spectral and sample data.
     """
-
-    def __init__(self, id, waves, ampls, sampledata):
+    @dynamic_default(list, "waves")
+    @dynamic_default(list, "ampls")
+    @dynamic_default(dict, "sampledata")
+    def __init__(self, id="noid", waves=None, ampls=None, sampledata=None):
         """
         Initializes the spectrum.
 

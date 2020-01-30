@@ -1,5 +1,9 @@
 from functools import wraps
 from inspect import isclass
+from typing import Type, TypeVar, Union
+
+# Type variable for the instance type
+T = TypeVar("T")
 
 
 class instanceoptionalmethod:
@@ -7,8 +11,6 @@ class instanceoptionalmethod:
     Decorator class (like classmethod/staticmethod) which provides
     the class as the first implicit parameter, and the instance as
     the second (if called on an instance) or None (if not).
-
-    Copied from wai.common.
     """
     def __init__(self, function):
         self._function = function
@@ -21,7 +23,7 @@ class instanceoptionalmethod:
         return intern
 
     @staticmethod
-    def is_instance(self) -> bool:
+    def is_instance(self: Union[T, Type[T]]) -> bool:
         """
         Checks if the given reference is an instance or a class.
 
@@ -30,3 +32,16 @@ class instanceoptionalmethod:
                         False if it is a class.
         """
         return not isclass(self)
+
+    @staticmethod
+    def type(self: Union[T, Type[T]]) -> Type[T]:
+        """
+        Helper method which gets the class from self.
+
+        :param self:    The instance/class reference.
+        :return:        The class.
+        """
+        if instanceoptionalmethod.is_instance(self):
+            return type(self)
+
+        return self

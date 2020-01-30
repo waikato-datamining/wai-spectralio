@@ -314,7 +314,7 @@ class SpectrumWriter(SpectrumIOBase):
         """
         # If called by class, create an instance
         if not instanceoptionalmethod.is_instance(self):
-            self = self()
+            return instanceoptionalmethod.type(self)(options).write(spectra, fname)
 
         # Apply the override options if given
         old_options = self.options

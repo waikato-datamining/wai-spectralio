@@ -8,5 +8,5 @@ class ProductCodeOptionsMixin(OptionHandler):
         default="01")
 
     product_code_from_field = Option(
-        help="Whether to use the product code as the attribute name containing the actual product code",
+        help="whether to use the product code option as the attribute name containing the actual product code",
         action="store_true")

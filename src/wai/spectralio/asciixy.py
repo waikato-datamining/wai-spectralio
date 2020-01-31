@@ -36,6 +36,9 @@ class Reader(SampleIDExtraction, SpectrumReader):
             waves.append(float(parts[0]))
             ampls.append(float(parts[1]))
 
+        waves.reverse()
+        ampls.reverse()
+
         return [Spectrum(sample_id, waves, ampls)]
 
     def binary_mode(self, filename: str) -> bool:

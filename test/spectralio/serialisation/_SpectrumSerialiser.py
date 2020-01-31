@@ -77,10 +77,10 @@ class SpectrumSerialiser(RegressionSerialiser[Spectrum]):
         for i, result_wave, result_ampl, ref_wave, ref_ampl in zip(range(num_ref_waves),
                                                                    result.waves, result.amplitudes,
                                                                    reference.waves, reference.amplitudes):
-            if result_wave != ref_wave:
+            if abs(result_wave - ref_wave) > 1e-8:
                 return f"Wave numbers differ at position {i} ({result_wave} vs. {ref_wave})"
 
-            if result_ampl != ref_ampl:
+            if abs(result_ampl - ref_ampl) > 1e-8:
                 return f"Amplitudes differ at position {i} ({result_ampl} vs. {ref_ampl})"
 
         if result.sampledata != reference.sampledata:

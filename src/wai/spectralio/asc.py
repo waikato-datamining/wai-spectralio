@@ -3,6 +3,7 @@ import re
 from typing import Dict, Optional, List, Tuple, Type
 
 from .api import LoggingObject, SpectrumReader, SpectrumWriter, Spectrum
+from .mixins import ProductCodeOptionsMixin
 from .options import Option
 from .util import with_locale
 
@@ -154,15 +155,13 @@ class Reader(SpectrumReader):
         return Writer
 
 
-class Writer(SpectrumWriter):
+class Writer(ProductCodeOptionsMixin, SpectrumWriter):
     """
     Writer that stores spectrums in the BLGG ASC format.
     """
     # Options
     instrument_name = Option(help="Instrument Name to be used in ASC header", default="<not implemented>")
     accessory_name = Option(help="Accessory Name to be used in ASC header", default="ABB-BOMEM MB160D")
-    product_code = Option(help="either the attribute name with the product code in it, or the actual product code to be used", default="01")
-    product_code_from_field = Option(help="Whether to use the product code as the attribute name containing the actual product code", action="store_true")
     data_points = Option(help="number of data points. -1 means use as many as in spectrum", type=int, default=-1)
     first_x_point = Option(help="first wavenumber", type=float, default=3749.3428948242)
     last_x_point = Option(help="last wavenumber", type=float, default=9998.2477195313)

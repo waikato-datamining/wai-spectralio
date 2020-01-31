@@ -186,12 +186,14 @@ class SpectrumReader(SpectrumIOBase):
         if not instanceoptionalmethod.is_instance(self):
             return instanceoptionalmethod.type(self)(options).read(fname)
 
-        # Apply the override options if given
+        # Save the current options
         old_options = self.options
-        if options is not None:
-            self.options = options
 
         try:
+            # Apply the override options if given
+            if options is not None:
+                self.options = options
+
             with self.open(fname, 'r') as specfile:
                 return self._read(specfile, fname)
         finally:
@@ -261,12 +263,14 @@ class SpectrumWriter(SpectrumIOBase):
         if not instanceoptionalmethod.is_instance(self):
             return instanceoptionalmethod.type(self)(options).write(spectra, fname)
 
-        # Apply the override options if given
+        # Save the current options
         old_options = self.options
-        if options is not None:
-            self.options = options
 
         try:
+            # Apply the override options if given
+            if options is not None:
+                self.options = options
+
             with self.open(fname, 'w') as specfile:
                 return self._write(spectra, specfile, self.binary_mode(fname))
         finally:

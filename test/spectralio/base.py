@@ -30,7 +30,7 @@ class SpectrumReaderTest(AbstractTest):
 
     @RegressionTest
     def read(self, subject: SpectrumReader, filename: str):
-        return {"read": subject.read(filename)[0]}
+        return {f"read-{i}": spectrum for i, spectrum in enumerate(subject.read(filename))}
 
 
 class SpectrumWriterTest(AbstractTest):

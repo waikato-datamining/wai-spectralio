@@ -1,8 +1,8 @@
-from io import StringIO
+from io import StringIO, BytesIO
 from typing import Tuple, Type, Dict, Optional, Any
 
 from wai.test import AbstractTest
-from wai.test.decorators import RegressionTest
+from wai.test.decorators import RegressionTest, Test
 from wai.test.serialisation import RegressionSerialiser
 
 from wai.spectralio.api import Spectrum, SpectrumReader, SpectrumWriter
@@ -59,3 +59,30 @@ class SpectrumWriterTest(AbstractTest):
         subject._write(spec, mem_file, False)
 
         return {"write": mem_file}
+
+    @Test
+    def round_trip(self, subject: SpectrumWriter, filename: str):
+        """
+        Tests that the writer writes what the reader reads.
+
+        :param subject:     The writer.
+        :param filename:    The example file.
+        """
+        # Get a corresponding reader
+        reader = subject.get_reader()
+
+        # Read the file
+        spectra = reader.read(filename)
+
+        # Write the spectra to memory
+        binary_mode = subject.binary_mode(filename)
+        mem_file = (BytesIO if binary_mode else StringIO)()
+        subject._write(spectra, mem_file, binary_mode)
+
+        # Re-read the written file
+        mem_file.seek(0)
+        round_trip_spectra = reader._read(mem_file, filename)
+
+        for spectrum, round_trip_spectrum in zip(spectra, round_trip_spectra):
+            error = SpectrumSerialiser.compare(spectrum, round_trip_spectrum)
+            self.assertTrue(error is None, error)

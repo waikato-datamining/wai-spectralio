@@ -53,7 +53,7 @@ class SpectrumWriterTest(AbstractTest):
 
     @RegressionTest
     def write(self, subject: SpectrumWriter, filename: str):
-        spec = subject.get_reader_class()().read(filename)
+        spec = subject.get_reader().read(filename)
 
         mem_file = StringIO()
         subject._write(spec, mem_file, False)

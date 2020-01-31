@@ -1,5 +1,5 @@
 from argparse import ArgumentParser, Namespace
-from typing import Set, Type, Iterator, List, Optional, Any, Union, Dict
+from typing import Type, Iterator, List, Optional, Any, Union, Dict, Iterable
 
 from ..util import dynamic_default
 from ._Option import Option
@@ -101,6 +101,38 @@ class OptionHandler(object):
 
         # Get the value from the namespace by name
         return getattr(self._namespace, option)
+
+    def get_options_sub_list(self, options: Iterable[Union[str, Option]]) -> List[str]:
+        """
+        Gets the part of the options list which corresponds to
+        the given option.
+
+        :param options: The options, by name or reference.
+        :return:        The option's option-list segments.
+        """
+        # Get the set of option names
+        option_names = set(option if isinstance(option, str) else option.name
+                           for option in options)
+
+        # Convert option names to option references
+        options = list(getattr(type(self), option) for option in option_names)
+
+        # Convert references to option strings
+        option_strings = set(option.option_string for option in options)
+
+        # Get the slices of the options list corresponding to the option
+        options_sub_list = []
+        slice_started: bool = False
+        for string in self._options_list:
+            # See if we are in a valid slice
+            if string.startswith("--"):
+                slice_started = string in option_strings
+
+            # Add the string to the sub-list if it's part of a valid slice
+            if slice_started:
+                options_sub_list.append(string)
+
+        return options_sub_list
 
     @property
     def options(self):

@@ -221,6 +221,25 @@ class SpectrumReader(SpectrumIOBase):
         """
         raise NotImplementedError(SpectrumReader.get_writer_class.__qualname__)
 
+    def get_writer(self) -> 'SpectrumWriter':
+        """
+        Gets a writer that writes the same format as this reader
+        reads. Any common options between the reader and writer are
+        copied.
+
+        :return:    The writer.
+        """
+        # Get the writer class
+        writer_class = self.get_writer_class()
+
+        # Get the common options between ourselves and the writer class
+        common_options = self.get_common_options(writer_class)
+
+        # Get the options sub-list corresponding to those options
+        common_option_sub_list = self.get_options_sub_list(common_options)
+
+        return writer_class(common_option_sub_list)
+
 
 class SpectrumWriter(SpectrumIOBase):
     """
@@ -277,3 +296,22 @@ class SpectrumWriter(SpectrumIOBase):
         :return:    The reader class.
         """
         raise NotImplementedError(SpectrumWriter.get_reader_class.__qualname__)
+
+    def get_reader(self) -> SpectrumReader:
+        """
+        Gets a reader that reads the same format as this writer
+        writes. Any common options between the reader and writer are
+        copied.
+
+        :return:    The reader.
+        """
+        # Get the reader class
+        reader_class = self.get_reader_class()
+
+        # Get the common options between ourselves and the reader class
+        common_options = self.get_common_options(reader_class)
+
+        # Get the options sub-list corresponding to those options
+        common_option_sub_list = self.get_options_sub_list(common_options)
+
+        return reader_class(common_option_sub_list)

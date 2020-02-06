@@ -1,1 +1,2 @@
+from ._LocaleOptionsMixin import LocaleOptionsMixin
 from ._ProductCodeOptionsMixin import ProductCodeOptionsMixin

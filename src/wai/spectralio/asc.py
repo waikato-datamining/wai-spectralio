@@ -3,7 +3,7 @@ import re
 from typing import Dict, Optional, List, Tuple, Type
 
 from .api import LoggingObject, SpectrumReader, SpectrumWriter, Spectrum
-from .mixins import ProductCodeOptionsMixin
+from .mixins import ProductCodeOptionsMixin, LocaleOptionsMixin
 from .options import Option
 from .util import with_locale
 
@@ -111,12 +111,10 @@ class ParsedFile(LoggingObject):
         return True
 
 
-class Reader(SpectrumReader):
+class Reader(LocaleOptionsMixin, SpectrumReader):
     """
     Reads spectra in BLGG ASC format.
     """
-    locale = Option(help="the locale to use for parsing the numbers", default="en_US")
-
     def _fix_key(self, key: str) -> str:
         """
         Turns the key into a proper SampleData constant.
@@ -155,7 +153,7 @@ class Reader(SpectrumReader):
         return Writer
 
 
-class Writer(ProductCodeOptionsMixin, SpectrumWriter):
+class Writer(ProductCodeOptionsMixin, LocaleOptionsMixin, SpectrumWriter):
     """
     Writer that stores spectrums in the BLGG ASC format.
     """
@@ -166,7 +164,6 @@ class Writer(ProductCodeOptionsMixin, SpectrumWriter):
     first_x_point = Option(help="first wavenumber", type=float, default=3749.3428948242)
     last_x_point = Option(help="last wavenumber", type=float, default=9998.2477195313)
     descending = Option(help="if set to true, the spectrum is output in descending x-axis order", action="store_true")
-    locale = Option(help="the locale to use for parsing the numbers", default="en_US")
 
     def gen_product_code(self, data: Spectrum) -> str:
         """

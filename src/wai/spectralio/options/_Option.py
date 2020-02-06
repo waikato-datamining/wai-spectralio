@@ -8,6 +8,9 @@ T = TypeVar("T")
 
 
 class Option:
+    """
+    Descriptor class which sets an option on an option-handler.
+    """
     def __init__(self, *,
                  action: Union[str, Type[Action]] = ...,
                  nargs: Union[int, str] = ...,

@@ -27,7 +27,7 @@ class SpectrumSerialiser(RegressionSerialiser[Spectrum]):
             file.write(f"d {wave},{ampl}\n")
 
         # Write the sample data
-        for key, value in result.sampledata.items():
+        for key, value in result.sample_data.items():
             value = f"'{value}'" if isinstance(value, str) else str(value)
             file.write(f"s {key}={value}\n")
 
@@ -83,7 +83,7 @@ class SpectrumSerialiser(RegressionSerialiser[Spectrum]):
             if abs(result_ampl - ref_ampl) > 1e-8:
                 return f"Amplitudes differ at position {i} ({result_ampl} vs. {ref_ampl})"
 
-        if result.sampledata != reference.sampledata:
+        if result.sample_data != reference.sample_data:
             return "Sample data differs"
 
         return None

@@ -12,21 +12,21 @@ class Reader(SampleIDExtraction, SpectrumReader):
     # Options
     separator = Option(help='the separator to use for identifying X and Y columns', default=';')
 
-    def _read(self, specfile, fname):
+    def _read(self, spec_file, filename):
         """
         Reads the spectra from the file handle.
 
-        :param specfile: the file handle to read from
-        :type specfile: file
-        :param fname: the file being read
-        :type fname: str
+        :param spec_file: the file handle to read from
+        :type spec_file: file
+        :param filename: the file being read
+        :type filename: str
         :return: the list of spectra
         :rtype: list
         """
-        sample_id = self.extract(fname)
+        sample_id = self.extract(filename)
         waves = []
         ampls = []
-        for line in specfile.readlines():
+        for line in spec_file.readlines():
             line = line.strip()
             if len(line) == 0:
                 continue
@@ -56,14 +56,14 @@ class Writer(SpectrumWriter):
     # Options
     separator = Option(help='the separator to use for identifying X and Y columns', default=';')
 
-    def _write(self, spectra, specfile, as_bytes):
+    def _write(self, spectra, spec_file, as_bytes):
         """
         Writes the spectra to the filehandle.
 
         :param spectra: the list of spectra
         :type spectra: list
-        :param specfile: the file handle to use
-        :type specfile: file
+        :param spec_file: the file handle to use
+        :type spec_file: file
         """
         if len(spectra) != 1:
             raise ValueError("Can only write a single spectrum")
@@ -71,7 +71,7 @@ class Writer(SpectrumWriter):
         spectrum = spectra[0]
 
         for wave, ampl in reversed(list(zip(spectrum.waves, spectrum.amplitudes))):
-            specfile.write(f"{wave}{self.separator}{ampl}\n")
+            spec_file.write(f"{wave}{self.separator}{ampl}\n")
 
     def binary_mode(self, filename: str) -> bool:
         return False

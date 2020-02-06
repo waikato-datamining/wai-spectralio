@@ -127,9 +127,9 @@ class Reader(LocaleOptionsMixin, SpectrumReader):
 
         return key
 
-    def _read(self, specfile, fname):
+    def _read(self, spec_file, filename):
         pf = ParsedFile()
-        pf.parse_with_locale(specfile.read(), self.locale)
+        pf.parse_with_locale(spec_file.read(), self.locale)
 
         # NIR list
         nir = pf.get_NIR_list()
@@ -174,13 +174,13 @@ class Writer(ProductCodeOptionsMixin, LocaleOptionsMixin, SpectrumWriter):
         """
         product_code = self.product_code
         if self.product_code_from_field:
-            if data.sampledata is None:
+            if data.sample_data is None:
                 return "<Report Not Available"
 
-            if product_code not in data.sampledata:
+            if product_code not in data.sample_data:
                 return f"<Field '{product_code}' Not Available in Report"
 
-            product_code = data.sampledata[product_code]
+            product_code = data.sample_data[product_code]
 
         return product_code
 
@@ -258,21 +258,21 @@ class Writer(ProductCodeOptionsMixin, LocaleOptionsMixin, SpectrumWriter):
 
         return ret
 
-    def _write(self, spectra, specfile, as_bytes):
+    def _write(self, spectra, spec_file, as_bytes):
         """
         Writes the spectra to the filehandle.
 
         :param spectra: the list of spectra
         :type spectra: list
-        :param specfile: the file handle to use
-        :type specfile: file
+        :param spec_file: the file handle to use
+        :type spec_file: file
         :param as_bytes: whether to write as bytes or string
         :type as_bytes: bool
         """
         if len(spectra) != 1:
             raise ValueError("Writer can only write exactly 1 spectrum at a time!")
 
-        specfile.write(self.gen_ASC_string(spectra[0]))
+        spec_file.write(self.gen_ASC_string(spectra[0]))
 
     def binary_mode(self, filename: str) -> bool:
         return False

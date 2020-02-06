@@ -92,20 +92,20 @@ class Reader(SpectrumReader):
 
         return Spectrum(id, waves, ampls, sampledata)
 
-    def _read(self, specfile, fname):
+    def _read(self, spec_file, filename):
         """
         Reads the spectra from the file handle.
 
-        :param specfile: the file handle to read from
-        :type specfile: file
-        :param fname: the file being read
-        :type fname: str
+        :param spec_file: the file handle to read from
+        :type spec_file: file
+        :param filename: the file being read
+        :type filename: str
         :return: the list of spectra
         :rtype: list
         """
 
         result = []
-        lines = specfile.readlines()
+        lines = spec_file.readlines()
         subset = []
         for i in range(len(lines)):
             if lines[i] == SEPARATOR:
@@ -137,23 +137,23 @@ class Writer(SpectrumWriter):
     # Options
     output_sampledata = Option(action='store_true', help='whether to output the sample data as well')
 
-    def _write(self, spectra, specfile, as_bytes):
+    def _write(self, spectra, spec_file, as_bytes):
         """
         Writes the spectra to the filehandle.
 
         :param spectra: the list of spectra
         :type spectra: list
-        :param specfile: the file handle to use
-        :type specfile: file
+        :param spec_file: the file handle to use
+        :type spec_file: file
         :param as_bytes: whether to write as bytes or string
         :type as_bytes: bool
         """
         # Create a writing function which handles the as_bytes argument
         if as_bytes:
             def write(string: str):
-                specfile.write(string.encode())
+                spec_file.write(string.encode())
         else:
-            write = specfile.write
+            write = spec_file.write
 
         first = True
         for spectrum in spectra:
@@ -163,8 +163,8 @@ class Writer(SpectrumWriter):
             if self._options_parsed.output_sampledata:
                 # prefix sample data with '# '
                 props = Properties()
-                for k in spectrum.sampledata:
-                    v = spectrum.sampledata[k]
+                for k in spectrum.sample_data:
+                    v = spectrum.sample_data[k]
                     props[k] = str(v)
                     if isinstance(v, int) or isinstance(v, float):
                         props[k + DATATYPE_SUFFIX] = "N"

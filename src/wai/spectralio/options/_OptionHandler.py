@@ -44,7 +44,14 @@ class OptionHandler(object):
         :return:    An iterator over the options.
         """
         for name in dir(cls):
+            # Option names can't start with underscores
+            if name.startswith("_"):
+                continue
+
+            # Get the attribute
             obj = getattr(cls, name)
+
+            # If it's an option descriptor, yield it
             if isinstance(obj, Option):
                 yield obj
 

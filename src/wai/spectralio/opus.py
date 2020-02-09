@@ -21,6 +21,10 @@ class Reader(SpectrumReader):
         action="store_true"
     )
 
+    # Class serialisers
+    _int_serialiser = IntSerialiser(signed=False)
+    _float_serialiser = FloatSerialiser()
+
     def __init__(self, options=None):
         super().__init__(options)
 
@@ -253,7 +257,7 @@ class Reader(SpectrumReader):
             return []
 
         new_count: int = self._get_int(buf, offset_num + 8)
-        fd = FloatSerialiser()
+        fd = self._float_serialiser
         first_x: float = fd.deserialise_from_bytes(buf[offset_first + 8: offset_first + 16])
         last_x: float = fd.deserialise_from_bytes(buf[offset_last + 8: offset_last + 16])
         diff: float = (last_x - first_x) / (new_count - 1)
@@ -349,8 +353,8 @@ class Reader(SpectrumReader):
         self._trace["getABDataOffset"] = result
         return result
 
-    @staticmethod
-    def _get_int(buf: bytes, offset: int) -> int:
+    @classmethod
+    def _get_int(cls, buf: bytes, offset: int) -> int:
         """
         Get int from 4bytes, LSByte first.
 
@@ -358,7 +362,7 @@ class Reader(SpectrumReader):
         :param offset:  Grab from.
         :return:        Integer.
         """
-        return IntSerialiser(signed=False).deserialise_from_bytes(buf[offset:offset + 4])
+        return cls._int_serialiser.deserialise_from_bytes(buf[offset:offset + 4])
 
     def _get_AB_offset(self, buf: bytes) -> int:
         """

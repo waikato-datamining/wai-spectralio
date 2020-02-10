@@ -23,7 +23,8 @@ class Reader(SpectrumReader):
 
     # Class serialisers
     _int_serialiser = IntSerialiser(signed=False)
-    _float_serialiser = FloatSerialiser()
+    _double_serialiser = FloatSerialiser()
+    _float_serialiser = FloatSerialiser(double_precision=False)
 
     def __init__(self, options=None):
         super().__init__(options)
@@ -257,7 +258,7 @@ class Reader(SpectrumReader):
             return []
 
         new_count: int = self._get_int(buf, offset_num + 8)
-        fd = self._float_serialiser
+        fd = self._double_serialiser
         first_x: float = fd.deserialise_from_bytes(buf[offset_first + 8: offset_first + 16])
         last_x: float = fd.deserialise_from_bytes(buf[offset_last + 8: offset_last + 16])
         diff: float = (last_x - first_x) / (new_count - 1)
@@ -333,7 +334,7 @@ class Reader(SpectrumReader):
 
         try:
             for count in range(ndp):
-                ret.append(self._get_int(buf, datastart + count * 4))
+                ret.append(self._get_float(buf, datastart + count * 4))
         except Exception:
             return []
 
@@ -363,6 +364,17 @@ class Reader(SpectrumReader):
         :return:        Integer.
         """
         return cls._int_serialiser.deserialise_from_bytes(buf[offset:offset + 4])
+
+    @classmethod
+    def _get_float(cls, buf: bytes, offset: int) -> float:
+        """
+        Get float.
+
+        :param buf:     Bytes.
+        :param offset:  Grab from.
+        :return:        Float.
+        """
+        return cls._float_serialiser.deserialise_from_bytes(buf[offset:offset + 4])
 
     def _get_AB_offset(self, buf: bytes) -> int:
         """

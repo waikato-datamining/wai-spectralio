@@ -5,3 +5,4 @@ from ._IntSerialiser import IntSerialiser
 from ._LengthPrefixedStringSerialiser import LengthPrefixedStringSerialiser
 from ._NullTerminatedStringSerialiser import NullTerminatedStringSerialiser
 from ._SecondsSinceEpochSerialiser import SecondsSinceEpochSerialiser
+from ._StringSerialiser import StringSerialiser, NULL_BYTE

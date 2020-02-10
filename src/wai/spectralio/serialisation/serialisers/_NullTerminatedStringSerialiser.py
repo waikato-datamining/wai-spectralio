@@ -1,61 +1,31 @@
 from typing import IO
 
-from .._Serialiser import Serialiser
-
-# The null terminator byte
-NULL_BYTE: bytes = b'\x00'
+from ._StringSerialiser import StringSerialiser, NULL_BYTE
 
 
-class NullTerminatedStringSerialiser(Serialiser[str]):
+class NullTerminatedStringSerialiser(StringSerialiser):
     """
-    Serialiser of strings. Encodes the string with a given encoding
-    and appends a null terminator to the end. If specified, the string
-    is padded with null terminators up to a given length.
+    Serialises a string by appending a null byte after the
+    encoded string.
     """
     def __init__(self,
-                 encoding: str = "utf-8",
-                 fixed_length: int = 0,
-                 fixed_length_ignore_null: bool = False):
-        self._encoding: str = encoding
-        self._fixed_length: int = fixed_length
-        self._fixed_length_ignore_null: bool = fixed_length_ignore_null
+                 encoding: str = "utf-8"):
+        super().__init__(encoding)
 
-    def _check(self, obj: str):
-        # Make sure it really is a string
-        if not isinstance(obj, str):
-            raise TypeError(f"StringSerialiser serialises strings, got {type(obj)}")
+    def _check_encoded(self, encoded: bytes):
+        # Check the encoded string doesn't already contain null-bytes
+        if NULL_BYTE in encoded:
+            raise ValueError(f"Encoded string {encoded} contains a null-byte")
 
-    def _serialise(self, obj: str, stream: IO[bytes]):
-        # Encode the string
-        byte_string = obj.encode()
+    def _serialise_encoded(self, encoded: bytes, stream: IO[bytes]):
+        stream.write(encoded)
+        stream.write(NULL_BYTE)
 
-        # Pad/truncate to the fixed length, if provided
-        if self._fixed_length > 0:
-            if len(byte_string) < self._fixed_length:
-                byte_string += NULL_BYTE * (self._fixed_length - len(byte_string))
-            else:
-                byte_string = byte_string[:self._fixed_length]
-
-        # Add the terminator byte unless set to ignore
-        if self._fixed_length > 0:
-            if not self._fixed_length_ignore_null:
-                byte_string = byte_string[:-1] + NULL_BYTE
-        else:
-            byte_string = byte_string + NULL_BYTE
-
-        stream.write(byte_string)
-
-    def _deserialise(self, stream: IO[bytes]) -> str:
+    def _deserialise_encoded(self, stream: IO[bytes]) -> bytes:
         # Read the bytes
         byte_string: bytes = b''
-        if self._fixed_length > 0:
-            byte_string = stream.read(self._fixed_length)
-        else:
-            while not byte_string.endswith(NULL_BYTE):
-                byte_string += stream.read(1)
+        while not byte_string.endswith(NULL_BYTE):
+            byte_string += stream.read(1)
 
-        # Remove any null bytes
-        while byte_string.endswith(NULL_BYTE):
-            byte_string = byte_string[:-1]
-
-        return byte_string.decode(self._encoding)
+        # Return without the null-byte
+        return byte_string[:-1]

@@ -212,6 +212,7 @@ class Writer(ProductCodeOptionsMixin, SpectrumWriter):
         ih.serial = self.serial_no
         ih.num_seg = len(self.segment_widths)
         ih.points_per_segment = [self.segment_widths[i] for i in range(ih.num_seg)]
+        ih.points_per_segment += [0] * (20 - len(ih.points_per_segment))
         ih.wave = self.start_points[:7]
         ih.wave += [0.0] * (7 - len(ih.wave))
         ih.wave += self.increments[:7]
@@ -271,7 +272,7 @@ class Writer(ProductCodeOptionsMixin, SpectrumWriter):
         :return:    The data block.
         """
         db = DataBlock()
-        db.spectrum = sp
+        db.amplitudes = sp.amplitudes
         return db
 
     def get_constituent_values(self, sp: Spectrum) -> ConstituentValues:

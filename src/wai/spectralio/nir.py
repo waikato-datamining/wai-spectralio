@@ -89,7 +89,7 @@ class Reader(SpectrumReader):
     def _read(self, spec_file, filename):
         spectra = []
 
-        ff = FossFileSerialiser().deserialise_from_bytes(spec_file.read())
+        ff = FossFileSerialiser().deserialise(spec_file)
 
         num_deleted = 0
         act_count = 0

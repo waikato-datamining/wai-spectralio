@@ -213,6 +213,7 @@ class Writer(ProductCodeOptionsMixin, SpectrumWriter):
         ih.num_seg = len(self.segment_widths)
         ih.points_per_segment = [self.segment_widths[i] for i in range(ih.num_seg)]
         ih.points_per_segment += [0] * (20 - len(ih.points_per_segment))
+        ih.spacing_mode = 1
         ih.wave = self.start_points[:7]
         ih.wave += [0.0] * (7 - len(ih.wave))
         ih.wave += self.increments[:7]

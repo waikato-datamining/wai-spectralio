@@ -1,2 +1,3 @@
+from ._BinaryFileSerialiser import BinaryFileSerialiser
 from ._SpectrumSerialiser import SpectrumSerialiser
 from ._TextFileSerialiser import TextFileSerialiser

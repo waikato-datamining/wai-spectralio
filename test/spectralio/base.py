@@ -7,7 +7,7 @@ from wai.test.serialisation import RegressionSerialiser
 
 from wai.spectralio.api import Spectrum, SpectrumReader, SpectrumWriter
 
-from .serialisation import SpectrumSerialiser, TextFileSerialiser
+from .serialisation import SpectrumSerialiser, TextFileSerialiser, BinaryFileSerialiser
 
 
 class SpectrumReaderTest(AbstractTest):
@@ -49,14 +49,16 @@ class SpectrumWriterTest(AbstractTest):
 
     @classmethod
     def common_serialisers(cls) -> Dict[Type, Type[RegressionSerialiser]]:
-        return {StringIO: TextFileSerialiser}
+        return {StringIO: TextFileSerialiser,
+                BytesIO: BinaryFileSerialiser}
 
     @RegressionTest
     def write(self, subject: SpectrumWriter, filename: str):
         spec = subject.get_reader().read(filename)
 
-        mem_file = StringIO()
-        subject._write(spec, mem_file, False)
+        binary_mode = subject.binary_mode(filename)
+        mem_file = (BytesIO if binary_mode else StringIO)()
+        subject._write(spec, mem_file, binary_mode)
 
         return {"write": mem_file}
 

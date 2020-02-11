@@ -28,7 +28,7 @@ class BoolSerialiser(Serialiser[bool]):
             raise TypeError(f"Bool01Serialiser serialises bools, got {type(obj)}")
 
     def _serialise(self, obj: bool, stream: IO[bytes]):
-        return self._true_byte if obj else self._false_byte
+        stream.write(self._true_byte if obj else self._false_byte)
 
     def _deserialise(self, stream: IO[bytes]) -> bool:
         byte = stream.read(1)

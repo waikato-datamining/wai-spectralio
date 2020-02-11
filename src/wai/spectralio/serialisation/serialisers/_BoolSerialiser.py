@@ -25,7 +25,7 @@ class BoolSerialiser(Serialiser[bool]):
     def _check(self, obj: bool):
         # Make sure we got a tuple of bools
         if not isinstance(obj, bool):
-            raise TypeError(f"Bool01Serialiser serialises bools, got {type(obj)}")
+            raise TypeError(f"{BoolSerialiser.__name__} serialises bools, got {type(obj)}")
 
     def _serialise(self, obj: bool, stream: IO[bytes]):
         stream.write(self._true_byte if obj else self._false_byte)

@@ -70,8 +70,8 @@ class Reader(SpectrumReader):
 
     def get_wavenumbers(self, instrument_header: InstrumentHeader) -> List[float]:
         total_points = 0
-        for segment in instrument_header.points_per_segment:
-            total_points += segment
+        for segment in range(instrument_header.num_seg):
+            total_points += instrument_header.points_per_segment[segment]
 
         # Can only handle EQLSPA
         if instrument_header.spacing_mode != 1:
@@ -80,8 +80,8 @@ class Reader(SpectrumReader):
 
         wavenumbers = []
 
-        for i, segment in enumerate(instrument_header.points_per_segment):
-            for j in range(segment):
+        for i in range(instrument_header.num_seg):
+            for j in range(instrument_header.points_per_segment[i]):
                 wavenumbers.append(instrument_header.starts[i] + j * instrument_header.increments[i])
 
         return wavenumbers
@@ -213,11 +213,11 @@ class Writer(ProductCodeOptionsMixin, SpectrumWriter):
         ih.num_seg = len(self.segment_widths)
         ih.points_per_segment = [self.segment_widths[i] for i in range(ih.num_seg)]
         ih.wave = self.start_points[:7]
-        ih.wave += [float] * (7 - len(ih.wave))
+        ih.wave += [0.0] * (7 - len(ih.wave))
         ih.wave += self.increments[:7]
-        ih.wave += [float] * (14 - len(ih.wave))
+        ih.wave += [0.0] * (14 - len(ih.wave))
         ih.wave += self.end_points[:7]
-        ih.wave += [float] * (21 - len(ih.wave))
+        ih.wave += [0.0] * (21 - len(ih.wave))
         ih.neoc = self.EOC
         ih.constituents = [""] * 32
 

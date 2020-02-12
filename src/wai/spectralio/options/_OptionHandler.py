@@ -1,7 +1,7 @@
 from argparse import ArgumentParser, Namespace
 from typing import Type, Iterator, List, Optional, Any, Union, Dict, Iterable
 
-from ..util import dynamic_default
+from ..util.dynamic_defaults import dynamic_default, with_dynamic_defaults
 from ._Option import Option
 
 
@@ -81,8 +81,8 @@ class OptionHandler(object):
                 if option.name in other_options
                 and other_options[option.name] == option)
 
-    @dynamic_default(list, "options")
-    def __init__(self, options=None):
+    @with_dynamic_defaults
+    def __init__(self, options=dynamic_default(list)):
         """
         Initializes the reader.
 

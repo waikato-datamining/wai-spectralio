@@ -4,21 +4,20 @@ from abc import ABC, abstractmethod
 from typing import AnyStr, IO, Type, Optional, List, Dict, Any
 
 from .options import OptionHandler, Option
-from .util import instanceoptionalmethod, dynamic_default
+from .util import instanceoptionalmethod
+from .util.dynamic_defaults import dynamic_default, with_dynamic_defaults
 
 
 class Spectrum:
     """
     Simple container for spectral and sample data.
     """
-    @dynamic_default(list, "waves")
-    @dynamic_default(list, "amplitudes")
-    @dynamic_default(dict, "sample_data")
+    @with_dynamic_defaults
     def __init__(self,
                  sample_id: str = "noid",
-                 waves: List[float] = None,
-                 amplitudes: List[float] = None,
-                 sample_data: Dict[str, Any] = None):
+                 waves: List[float] = dynamic_default(list),
+                 amplitudes: List[float] = dynamic_default(list),
+                 sample_data: Dict[str, Any] = dynamic_default(dict)):
         """
         Initializes the spectrum.
 

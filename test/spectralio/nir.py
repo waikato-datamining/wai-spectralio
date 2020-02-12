@@ -1,4 +1,5 @@
 import os
+from typing import Optional, Tuple, Any, Dict
 
 from wai.spectralio.nir import Reader, Writer
 
@@ -19,6 +20,13 @@ class NIRWriterTest(SpectrumWriterTest):
     @classmethod
     def subject_type(cls):
         return Writer
+
+    @classmethod
+    def common_arguments(cls) -> Optional[Tuple[Tuple[Any, ...], Dict[str, Any]]]:
+        # FIXME: Add timestamp argument as default timestamp uses today's
+        #        date, which means the regression fails after one day.
+        return tuple(), dict()
+
 
     @classmethod
     def get_example_filename(cls) -> str:

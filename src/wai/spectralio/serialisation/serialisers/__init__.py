@@ -1,5 +1,6 @@
 from ._BoolSerialiser import BoolSerialiser
 from ._FixedLengthStringSerialiser import FixedLengthStringSerialiser
+from ._FlagSerialiser import FlagSerialiser, UNUSED
 from ._FloatSerialiser import FloatSerialiser
 from ._IntSerialiser import IntSerialiser
 from ._LengthPrefixedStringSerialiser import LengthPrefixedStringSerialiser

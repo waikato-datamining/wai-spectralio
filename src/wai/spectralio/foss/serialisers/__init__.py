@@ -4,5 +4,6 @@ from ._DateSerialiser import DateSerialiser
 from ._FossFileSerialiser import FossFileSerialiser
 from ._GeneralHeaderSerialiser import GeneralHeaderSerialiser
 from ._InstrumentHeaderSerialiser import InstrumentHeaderSerialiser
+from ._SafeStringSerialiser import SafeStringSerialiser
 from ._SampleHeaderSerialiser import SampleHeaderSerialiser
 from ._SampleInfoSerialiser import SampleInfoSerialiser

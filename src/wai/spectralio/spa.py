@@ -36,7 +36,7 @@ class Reader(SpectrumReader):
 
             if block_type == 0x001B:
                 offset_comments = self._short_serialiser.deserialise_from_bytes(data[offset_block + 2:])
-                self.logger.info(f"offset commants: {offset_comments}")
+                self.logger.info(f"offset comments: {offset_comments}")
             elif block_type == 0x0003:
                 offset_data = self._short_serialiser.deserialise_from_bytes(data[offset_block + 2:])
                 self.logger.info(f"offset data: {offset_data}")

@@ -3,6 +3,8 @@ from abc import abstractmethod
 from io import BytesIO
 from typing import Generic, TypeVar, IO
 
+from .error import ensure_errors
+
 # The type of object the serialiser serialises/deserialises
 ObjectType = TypeVar("ObjectType")
 
@@ -35,6 +37,7 @@ class Serialiser(Generic[ObjectType]):
         """
         pass
 
+    @ensure_errors
     def serialise(self, obj: ObjectType, stream: IO[bytes]):
         """
         Serialises the given object to the given data-stream.
@@ -45,6 +48,7 @@ class Serialiser(Generic[ObjectType]):
         self._check(obj)
         self._serialise(obj, stream)
 
+    @ensure_errors
     def serialise_to_file(self, obj: ObjectType, filename: str):
         """
         Serialises the object to a file.
@@ -61,6 +65,7 @@ class Serialiser(Generic[ObjectType]):
         with open(filename, 'wb') as file:
             self.serialise(obj, file)
 
+    @ensure_errors
     def serialise_to_bytes(self, obj: ObjectType) -> bytes:
         """
         Gets the serialised state of the object.
@@ -93,6 +98,7 @@ class Serialiser(Generic[ObjectType]):
         """
         pass
 
+    @ensure_errors
     def deserialise(self, stream: IO[bytes]) -> ObjectType:
         """
         Deserialises an object from the given data-stream.
@@ -102,6 +108,7 @@ class Serialiser(Generic[ObjectType]):
         """
         return self._deserialise(stream)
 
+    @ensure_errors
     def deserialise_from_file(self, filename: str) -> ObjectType:
         """
         Deserialises an object from the given file.
@@ -112,6 +119,7 @@ class Serialiser(Generic[ObjectType]):
         with open(filename, 'rb') as file:
             return self.deserialise(file)
 
+    @ensure_errors
     def deserialise_from_bytes(self, data: bytes) -> ObjectType:
         """
         Deserialises an object from its serialised state.

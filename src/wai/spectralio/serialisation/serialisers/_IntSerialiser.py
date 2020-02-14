@@ -26,33 +26,39 @@ class IntSerialiser(Serialiser[int]):
             raise ValueError(f"Can't serialise negative ints in unsigned mode")
 
         # Make sure the value is not too big
-        if self._bit_length_actual(obj) > 8 * self._num_bytes:
+        if self.bit_length_actual(obj, self._signed) > 8 * self._num_bytes:
             raise ValueError(f"Int magnitude is too big for current num_bytes setting "
                              f"({obj} won't fit in {self._num_bytes} "
                              f"byte{'s' if self._num_bytes > 1 else ''})")
 
-    def _bit_length_actual(self, obj: int) -> int:
+    @staticmethod
+    def bit_length_actual(value: int, signed: bool) -> int:
         """
         Gets the actual bit-length of the serialised int,
         taking into account the sign-mode of the serialiser.
 
-        :param obj:     The int to serialise.
+        :param value:   The int to serialise.
+        :param signed:  Whether the bit-representation is signed.
         :return:        The serialised bit-length.
         """
         # Zero always takes 1 bit
-        if obj == 0:
+        if value == 0:
             return 1
 
-        if self._signed:
-            if obj > 0:
-                return obj.bit_length() + 1
-            else:
-                return (obj + 1).bit_length() + 1
-        else:
-            if obj > 0:
-                return obj.bit_length()
-            else:
-                return -1
+        # Positive value, signed field
+        if signed and value > 0:
+            return value.bit_length() + 1
+
+        # Negative value, signed field
+        if signed and value < 0:
+            return (value + 1).bit_length() + 1
+
+        # Positive value, unsigned field
+        if value > 0:
+            return value.bit_length()
+
+        # Negative value, unsigned field
+        raise ValueError(f"Can't find unsigned bit-length of signed value {value}")
 
     def _serialise(self, obj: int, stream: IO[bytes]):
         stream.write(obj.to_bytes(self._num_bytes, self._endianness, signed=self._signed))

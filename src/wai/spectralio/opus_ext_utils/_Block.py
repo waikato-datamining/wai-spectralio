@@ -99,5 +99,11 @@ class Block:
 
     def __str__(self):
         masked_type_hex = (self.type & BLOCK_TYPE_SPEC_MASK).to_bytes(3, "big", signed=False).hex()[-5:]
-        return f"definition={self.definition}, type={self.type}, maskedTypeHex={masked_type_hex}, " \
-            f"name={self.name}, start={self.start}, end={self.end}"
+        return (
+            f"definition={self.definition}, "
+            f"type={self.type}, "
+            f"maskedTypeHex={masked_type_hex}, "
+            f"name={self.name}, "
+            f"start={self.start}, "
+            f"end={self.end}"
+        )

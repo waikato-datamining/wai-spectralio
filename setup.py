@@ -30,9 +30,6 @@ setup(
         '': 'src'
     },
     packages=find_namespace_packages(where='src'),
-    namespace_packages=[
-        "wai"
-    ],
     install_requires=[
         "javaproperties",
     ],

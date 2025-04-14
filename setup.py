@@ -1,6 +1,3 @@
-# setup.py
-# Copyright (C) 2020 University of Waikato, Hamilton, NZ
-
 from setuptools import setup, find_namespace_packages
 
 
@@ -16,7 +13,7 @@ def _read(f):
 
 
 setup(
-    name="wai.spectralio",
+    name="wai_spectralio",
     description="Python library for reading/writing various NIR, MIR, XRF spectroscopy data formats.",
     long_description=(
         _read('DESCRIPTION.rst') + b'\n' +

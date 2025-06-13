@@ -160,7 +160,7 @@ class Writer(SpectrumWriter):
             if not first:
                 write(SEPARATOR + "\n")
 
-            if self._options_parsed.output_sampledata:
+            if self.output_sampledata:
                 # prefix sample data with '# '
                 props = Properties()
                 for k in spectrum.sample_data:

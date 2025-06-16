@@ -81,6 +81,15 @@ class Spectrum:
         """
         return self._sample_data
 
+    @sample_data.setter
+    def sample_data(self, value: Dict[str, Any]):
+        """
+        Sets the sample data.
+
+        :param value: The new sample Idata
+        """
+        self._sample_data = value
+
     def __len__(self) -> int:
         """
         Returns the number of spectral points in this spectrum.

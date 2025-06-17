@@ -124,14 +124,15 @@ class Reader(SpectrumReader):
             report = {}
 
             if ff.general_header.num_consts > 0:
-                if ff.general_header.num_consts != len(ff.instrument_header.constituents):
-                    self.logger.critical("Reference data is inconsistent")
-                else:
-                    for i, ref in enumerate(ff.instrument_header.constituents):
-                        if cv.constituents[i] == 0.0:
-                            continue
+                for i, ref in enumerate(ff.instrument_header.constituents):
+                    if i >= len(cv.constituents):
+                        break
+                    if len(ref) == 0:
+                        continue
+                    if cv.constituents[i] == 0.0:
+                        continue
 
-                        report[ref.lower()] = cv.constituents[i]
+                    report[ref.lower()] = cv.constituents[i]
 
             spectra.append(Spectrum(id_, waves, ampls, report))
 

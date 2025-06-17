@@ -4,7 +4,15 @@ Python library for reading/writing various NIR, MIR, XRF spectral data formats.
 ## Supported formats
 
 * [ADAMS](https://adams.cms.waikato.ac.nz/) spectra (.spec, .spec.gz)
-* ...
+* ASC
+* ASCII XY
+* CAL (FOSS)
+* DPT
+* MPS (XRF)
+* NIR (FOSS)
+* OPUS (Bruker)
+* OPUS ext (Bruker)
+* SPA (Thermo Scientific)
 
 
 ## API

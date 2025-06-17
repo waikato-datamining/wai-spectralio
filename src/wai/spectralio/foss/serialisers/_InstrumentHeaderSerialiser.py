@@ -35,7 +35,10 @@ class InstrumentHeaderSerialiser(Serialiser[InstrumentHeader]):
         self._int_serialiser.serialise(obj.neoc, stream)
         stream.write(b'\x00' * 94)
         for i in range(32):
-            self._constituent_serialiser.serialise(obj.constituents[i], stream)
+            if i < len(obj.constituents):
+                self._constituent_serialiser.serialise(obj.constituents[i], stream)
+            else:
+                self._constituent_serialiser.serialise("", stream)
 
     def _deserialise(self, stream: IO[bytes]) -> InstrumentHeader:
         ih = InstrumentHeader()

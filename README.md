@@ -19,12 +19,13 @@ Python library for reading/writing various NIR, MIR, XRF spectral data formats.
 
 The following classes are defined by the API:
 
-* `wai.spectralio.Spectrum` -- simple container for spectral data and associated sample data
-* `wai.spectralio.OptionHandler` -- superclass for classes that require option-handling/parsing
-* `wai.spectralio.SpectrumReader` -- superclass for spectral data readers (derived from `wai.spectralio.OptionHandler`)
-* `wai.spectralio.SpectrumWriter` -- superclass for spectral data writers (derived from `wai.spectralio.OptionHandler`)
+* `wai.spectralio.options.OptionHandler` -- superclass for classes that require option-handling/parsing
+* `wai.spectralio.options.Option` -- for defining an option within a Reader/Writer
+* `wai.spectralio.api.Spectrum` -- simple container for spectral data and associated sample data
+* `wai.spectralio.api.SpectrumReader` -- superclass for spectral data readers (implements `wai.spectralio.options.OptionHandler`)
+* `wai.spectralio.api.SpectrumWriter` -- superclass for spectral data writers (implrements `wai.spectralio.options.OptionHandler`)
 
-Classes derived from `wai.spectralio.OptionHandler` can output help for the supported options
+Classes derived from `wai.spectralio.options.OptionHandler` can output help for the supported options
 via the `options_help()` method. 
 
 
@@ -36,13 +37,13 @@ module for handling ADAMS spectra:
 ```python
 from wai.spectralio.adams import read, write
 
-sps = read("/some/where/data.spec.gz", options=["--keep_format"])
+sps = read("/some/where/data.spec.gz", options=["--keep-format"])
 for sp in sps:
     print(sp.id)
     print("  ", sp.waves)
     print("  ", sp.amplitudes)
-    print("  ", sp.sampledata)
-write(sps, "/somewhere/else/blah.spec.gz", options=["--output_sampledata"])
+    print("  ", sp.sample_data)
+write(sps, "/somewhere/else/blah.spec.gz", options=["--output-sampledata"])
 ```
 
 These two methods construct `Reader`/`Writer` objects on the fly and parse the supplied options. 
@@ -53,14 +54,35 @@ same object multiple times:
 from wai.spectralio.adams import Reader, Writer
 
 reader = Reader()
-reader.options = ["--keep_format"]
+reader.options = ["--keep-format"]
 sps = reader.read("/some/where/data.spec")
 for sp in sps:
     print(sp.id)
     print("  ", sp.waves)
     print("  ", sp.amplitudes)
-    print("  ", sp.sampledata)
+    print("  ", sp.sample_data)
 writer = Writer()
-writer.options = ["--output_sampledata"]
+writer.options = ["--output-sampledata"]
 writer.write(sps, "/somewhere/else/blah.spec.gz")
+```
+
+For converting between two formats, simply choose the appropriate Reader/Writer
+class (or read/write method). E.g., for ADAMS to FOSS CAL use this:
+
+```python
+import os
+from wai.spectralio.adams import Reader
+from wai.spectralio.cal import Writer
+
+reader = Reader()
+reader.options = ["--keep-format"]
+full = []
+path = "/some/where"
+for f in os.listdir(path):
+    if f.endswith(".spec"):
+        sps = reader.read(os.path.join(path, f))
+        full.extend(sps)
+writer = Writer()
+writer.constituents = ["ref_1", "ref_2"]  # the names of the sample data fields to store in the .cal file
+writer.write(full, "/else/where/blah.cal")
 ```

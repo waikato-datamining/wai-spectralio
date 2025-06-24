@@ -4,8 +4,8 @@ Changelog
 0.0.3 (????-??-??)
 ------------------
 
-- added support for spectra in CSV files (row-wise)
-- added support for spectra in ARFF files (row-wise)
+- added read/write support for spectra in CSV files (row-wise)
+- added read/write support for spectra in ARFF files (row-wise)
 
 
 0.0.2 (2025-06-18)

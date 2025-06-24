@@ -32,6 +32,7 @@ setup(
     packages=find_namespace_packages(where='src'),
     install_requires=[
         "javaproperties",
+        "simple_range",
     ],
     version="0.0.2",
     author='Peter Reutemann',

@@ -134,7 +134,7 @@ idea/
 *~
 *.bak
 *.swp
-blah.py
+blah*.py
 
 corey/
 .idea/

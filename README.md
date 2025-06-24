@@ -7,6 +7,7 @@ Python library for reading/writing various NIR, MIR, XRF spectral data formats.
 * ASC
 * ASCII XY
 * CAL (FOSS)
+* CSV (row-wise)
 * DPT
 * MPS (XRF)
 * NIR (FOSS)

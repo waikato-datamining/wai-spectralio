@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.0.3 (????-??-??)
+------------------
+
+- added support for spectra in CSV files (row-wise)
+
+
 0.0.2 (2025-06-18)
 ------------------
 

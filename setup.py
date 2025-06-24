@@ -33,6 +33,7 @@ setup(
     install_requires=[
         "javaproperties",
         "simple_range",
+        "liac_arff",
     ],
     version="0.0.2",
     author='Peter Reutemann',

@@ -4,6 +4,7 @@ Python library for reading/writing various NIR, MIR, XRF spectral data formats.
 ## Supported formats
 
 * [ADAMS](https://adams.cms.waikato.ac.nz/) spectra (.spec, .spec.gz)
+* [ARFF](https://waikato.github.io/weka-wiki/formats_and_processing/arff_syntax/) (row-wise)
 * ASC
 * ASCII XY
 * CAL (FOSS)

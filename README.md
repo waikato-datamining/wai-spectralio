@@ -1,6 +1,7 @@
 # wai-spectral-io
 Python library for reading/writing various NIR, MIR, XRF spectral data formats.
 
+
 ## Supported formats
 
 * [ADAMS](https://adams.cms.waikato.ac.nz/) spectra (.spec, .spec.gz)
@@ -15,6 +16,21 @@ Python library for reading/writing various NIR, MIR, XRF spectral data formats.
 * OPUS (Bruker)
 * OPUS ext (Bruker)
 * SPA (Thermo Scientific)
+
+
+## Installation
+
+Via PyPI:
+
+```bash
+pip install wai_spectralio
+```
+
+The latest code straight from the repository:
+
+```bash
+pip install git+https://github.com/waikato-datamining/wai-spectralio.git
+```
 
 
 ## API

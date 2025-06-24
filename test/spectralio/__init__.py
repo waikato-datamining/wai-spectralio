@@ -1,5 +1,7 @@
+from .arff import ARFFReaderTest, ARFFWriterTest
 from .asc import ASCReaderTest, ASCWriterTest
 from .asciixy import ASCIIXYReaderTest, ASCIIXYWriterTest
+from .csv import CSVReaderTest, CSVWriterTest
 from .dpt import DPTReaderTest, DPTWriterTest
 from .mps import MPSReaderTest
 from .nir import NIRReaderTest, NIRWriterTest

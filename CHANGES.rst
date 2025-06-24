@@ -6,6 +6,7 @@ Changelog
 
 - added read/write support for spectra in CSV files (row-wise)
 - added read/write support for spectra in ARFF files (row-wise)
+- the ADAMS writer now outputs the Sample ID as well
 
 
 0.0.2 (2025-06-18)

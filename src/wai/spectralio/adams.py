@@ -174,6 +174,9 @@ class Writer(SpectrumWriter):
                         props[k + DATATYPE_SUFFIX] = "S"
                     else:
                         props[k + DATATYPE_SUFFIX] = "U"
+                if "Sample ID" not in spectrum.sample_data:
+                    props["Sample ID"] = spectrum.id
+                    props["Sample ID" + DATATYPE_SUFFIX] = "S"
                 samplestr = dumps(props)
                 lines = samplestr.split("\n")
                 for i in range(len(lines)):

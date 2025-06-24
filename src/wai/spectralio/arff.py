@@ -24,6 +24,7 @@ class Reader(SpectrumReader):
     sample_id = Option(help='the attribute with the sample id (1-based index)', default='1')
     spectral_data = Option(help='the attributes with the spectral data (range, using 1-based indices)', default='2-last')
     sample_data = Option(help='the optional attribute(s) with sample data values (range, using 1-based indices)', default=None)
+    sample_data_prefix = Option(help='The prefix in use for the sample data attributes', default='')
     wave_numbers_in_header = Option(help='Whether the wave numbers are encoded in the attribute name', action='store_true')
     wave_numbers_regexp = Option(help='The regular expression for extracting the wave numbers from the attribute names (1st group is used)', default='(.*)')
 
@@ -38,6 +39,7 @@ class Reader(SpectrumReader):
         data = arff.load(spec_file)
         sample_data_range = None
         sample_data_names = None
+        sample_data_types = None
         wave_numbers = []
 
         # header
@@ -45,7 +47,10 @@ class Reader(SpectrumReader):
         spectral_data_range = Range(self.spectral_data, maximum=len(data['attributes'])).indices()
         if self.sample_data is not None:
             sample_data_range = Range(self.sample_data, maximum=len(data['attributes'])).indices()
-            sample_data_names = [data['attributes'][x] for x in sample_data_range]
+            sample_data_names = [data['attributes'][x][0] for x in sample_data_range]
+            sample_data_types = [data['attributes'][x][1] for x in sample_data_range]
+            if self.sample_data_prefix is not None:
+                sample_data_names = [x[len(self.sample_data_prefix):] for x in sample_data_names]
         if self.wave_numbers_in_header:
             for i in spectral_data_range:
                 match = re.match(self.wave_numbers_regexp, str(data['attributes'][i]))
@@ -64,7 +69,10 @@ class Reader(SpectrumReader):
             sample_data = dict()
             if sample_data_range is not None:
                 for i, r in enumerate(sample_data_range):
-                    sample_data[sample_data_names[i]] = row[r]
+                    value = row[r]
+                    if sample_data_types[i].upper() in ["NUMERIC", "REAL", "INTEGER"]:
+                        value = float(value)
+                    sample_data[sample_data_names[i]] = value
             result.append(Spectrum(sample_id, wave_numbers[:], amplitudes, sample_data))
 
         return result
@@ -97,7 +105,7 @@ class Writer(SpectrumWriter):
     # Options
     sample_id = Option(help='The attribute name to use for the sample ID column', default='sample_id')
     sample_data = Option(help='The names of the sample data values to output', default=None, nargs='*')
-    wave_number_format = Option(help='The format to use for the wave number attributes, the following placeholders are available: ' + "|".join(PLACEHOLDERS), default=PH_WAVE_NUMBER)
+    wave_numbers_format = Option(help='The format to use for the wave number attributes, the following placeholders are available: ' + "|".join(PLACEHOLDERS), default=PH_WAVE_NUMBER)
     sample_data_prefix = Option(help='The prefix to use for the sample data attributes', default='')
 
     def _write(self, spectra, spec_file, as_bytes):
@@ -125,14 +133,22 @@ class Writer(SpectrumWriter):
         data["attributes"] = list()
         data["attributes"].append((self.sample_id, 'STRING'))
         for i, w in enumerate(spectra[0].waves):
-            col = self.wave_number_format
+            col = self.wave_numbers_format
             col = col.replace(PH_INDEX, str(i))
             col = col.replace(PH_WAVE_NUMBER, locale.str(w))
             data["attributes"].append((col, 'NUMERIC'))
         if self.sample_data is not None:
+            sample_data_types = dict()
             for sd in self.sample_data:
                 col = self.sample_data_prefix + sd
-                data["attributes"].append((col, 'STRING'))
+                # determine type of sample data
+                sample_data_types[sd] = "NUMERIC"
+                for spectrum in spectra:
+                    if sd in spectrum.sample_data:
+                        if isinstance(spectrum.sample_data[sd], str):
+                            sample_data_types[sd] = "STRING"
+                            break
+                data["attributes"].append((col, sample_data_types[sd]))
 
         # data
         data["data"] = list()

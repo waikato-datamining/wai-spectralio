@@ -26,6 +26,7 @@ class Reader(LocaleOptionsMixin, SpectrumReader):
     sample_id = Option(help='the column with the sample id (1-based index)', default='1')
     spectral_data = Option(help='the columns with the spectral data (range, using 1-based indices)', default='2-last')
     sample_data = Option(help='the optional column(s) with sample data values (range, using 1-based indices)', default=None)
+    sample_data_prefix = Option(help='The prefix used in the columns with the sample data', default=None)
     delimiter = Option(help='the column separator to use', default=',')
     wave_numbers_in_header = Option(help='Whether the wave numbers are encoded in the column headers', action='store_true')
     wave_numbers_regexp = Option(help='The regular expression for extracting the wave numbers from the column headers (1st group is used)', default='(.*)')
@@ -54,6 +55,10 @@ class Reader(LocaleOptionsMixin, SpectrumReader):
                 if self.sample_data is not None:
                     sample_data_range = Range(self.sample_data, maximum=len(row)).indices()
                     sample_data_names = [row[x] for x in sample_data_range]
+                    if self.sample_data_prefix is not None:
+                        for i, name in enumerate(sample_data_names):
+                            if name.startswith(self.sample_data_prefix):
+                                sample_data_names[i] = name[len(self.sample_data_prefix):]
                 if self.wave_numbers_in_header:
                     for i in spectral_data_range:
                         match = re.match(self.wave_numbers_regexp, str(row[i]))
@@ -112,8 +117,8 @@ class Writer(LocaleOptionsMixin, SpectrumWriter):
     # Options
     sample_id = Option(help='The column header to use for the sample ID column', default='sample_id')
     sample_data = Option(help='The names of the sample data values to output', default=None, nargs='*')
-    wave_number_format = Option(help='The format to use for the wave number headers, the following placeholders are available: ' + "|".join(PLACEHOLDERS), default=PH_WAVE_NUMBER)
     sample_data_prefix = Option(help='The prefix to use for the sample data headers', default='')
+    wave_numbers_format = Option(help='The format to use for the wave number headers, the following placeholders are available: ' + "|".join(PLACEHOLDERS), default=PH_WAVE_NUMBER)
     delimiter = Option(help='the column separator to use', default=',')
 
     def _write_locale_unaware(self, spectra, spec_file, as_bytes):
@@ -142,7 +147,7 @@ class Writer(LocaleOptionsMixin, SpectrumWriter):
                 first = False
                 row = [self.sample_id]
                 for i, w in enumerate(spectrum.waves):
-                    col = self.wave_number_format
+                    col = self.wave_numbers_format
                     col = col.replace(PH_INDEX, str(i))
                     col = col.replace(PH_WAVE_NUMBER, locale.str(w))
                     row.append(col)

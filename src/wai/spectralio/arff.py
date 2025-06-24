@@ -24,7 +24,7 @@ class Reader(SpectrumReader):
     sample_id = Option(help='the attribute with the sample id (1-based index)', default='1')
     spectral_data = Option(help='the attributes with the spectral data (range, using 1-based indices)', default='2-last')
     sample_data = Option(help='the optional attribute(s) with sample data values (range, using 1-based indices)', default=None)
-    sample_data_prefix = Option(help='The prefix in use for the sample data attributes', default='')
+    sample_data_prefix = Option(help='The prefix in use for the sample data attributes', default=None)
     wave_numbers_in_header = Option(help='Whether the wave numbers are encoded in the attribute name', action='store_true')
     wave_numbers_regexp = Option(help='The regular expression for extracting the wave numbers from the attribute names (1st group is used)', default='(.*)')
 
@@ -50,7 +50,9 @@ class Reader(SpectrumReader):
             sample_data_names = [data['attributes'][x][0] for x in sample_data_range]
             sample_data_types = [data['attributes'][x][1] for x in sample_data_range]
             if self.sample_data_prefix is not None:
-                sample_data_names = [x[len(self.sample_data_prefix):] for x in sample_data_names]
+                for i, name in enumerate(sample_data_names):
+                    if name.startswith(self.sample_data_prefix):
+                        sample_data_names[i] = name[len(self.sample_data_prefix):]
         if self.wave_numbers_in_header:
             for i in spectral_data_range:
                 match = re.match(self.wave_numbers_regexp, str(data['attributes'][i]))

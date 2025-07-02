@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.0.4 (????-??-??)
+0.0.4 (2025-07-03)
 ------------------
 
 - added method `read_fp` to `SpectrumReader` and `write_fp` to `SpectrumWriter` to make use

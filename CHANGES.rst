@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.0.4 (????-??-??)
+------------------
+
+- added method `read_fp` to `SpectrumReader` and `write_fp` to `SpectrumWriter` to make use
+  of file-like objects directly
+
+
 0.0.3 (2025-06-25)
 ------------------
 

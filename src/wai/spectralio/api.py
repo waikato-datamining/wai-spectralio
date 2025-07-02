@@ -197,6 +197,32 @@ class SpectrumReader(SpectrumIOBase, ABC):
             if options is not None:
                 self.options = old_options
 
+    @instanceoptionalmethod
+    def read_fp(self, spec_file: IO[AnyStr], options: Optional[List[str]] = None) -> List[Spectrum]:
+        """
+        Reads the spectra from the specified file-like object.
+
+        :param spec_file:   The file handle to read from.
+        :param options:     The options to use.
+        :return:            The list of spectra that was read.
+        """
+        # If called by class, create an instance
+        if not instanceoptionalmethod.is_instance(self):
+            return instanceoptionalmethod.type(self)(options).read_fp(spec_file)
+
+        # Save the current options
+        old_options = self.options
+
+        try:
+            # Apply the override options if given
+            if options is not None:
+                self.options = options
+
+            return self._read(spec_file, ".")
+        finally:
+            if options is not None:
+                self.options = old_options
+
     def _read(self, spec_file: IO[AnyStr], filename: str) -> List[Spectrum]:
         """
         Reads the spectra from the file handle.
@@ -264,6 +290,33 @@ class SpectrumWriter(SpectrumIOBase, ABC):
 
             with self.open(filename, 'w') as spec_file:
                 return self._write(spectra, spec_file, self.binary_mode(filename))
+        finally:
+            if options is not None:
+                self.options = old_options
+
+    @instanceoptionalmethod
+    def write_fp(self, spectra: List[Spectrum], spec_file: IO[AnyStr], as_bytes: bool, options: Optional[List[str]] = None):
+        """
+        Writes the spectra to the specified file.
+
+        :param spectra:     The list of spectra.
+        :param spec_file:   The file handle to write to.
+        :param as_bytes:    Whether to write as bytes or string.
+        :param options:     The options to use.
+        """
+        # If called by class, create an instance
+        if not instanceoptionalmethod.is_instance(self):
+            return instanceoptionalmethod.type(self)(options).write_fp(spectra, spec_file, as_bytes)
+
+        # Save the current options
+        old_options = self.options
+
+        try:
+            # Apply the override options if given
+            if options is not None:
+                self.options = options
+
+            return self._write(spectra, spec_file, as_bytes)
         finally:
             if options is not None:
                 self.options = old_options

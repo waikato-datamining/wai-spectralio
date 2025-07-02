@@ -104,3 +104,9 @@ writer = Writer()
 writer.constituents = ["ref_1", "ref_2"]  # the names of the sample data fields to store in the .cal file
 writer.write(full, "/else/where/blah.cal")
 ```
+
+It is also possible to read from and write to file-like objects directly using
+the following methods:
+
+* SpectrumReader: `read_fp`
+* SpectrumWriter: `write_fp`

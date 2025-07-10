@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.0.5 (????-??-??)
+------------------
+
+- The writers for ARFF, ASC, ASCIIXY, CSV and DPT now handle writing to a binary file-like objects as well
+
+
 0.0.4 (2025-07-03)
 ------------------
 

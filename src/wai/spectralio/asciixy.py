@@ -71,7 +71,10 @@ class Writer(SpectrumWriter):
         spectrum = spectra[0]
 
         for wave, ampl in reversed(list(zip(spectrum.waves, spectrum.amplitudes))):
-            spec_file.write(f"{wave}{self.separator}{ampl}\n")
+            if as_bytes:
+                spec_file.write(f"{wave}{self.separator}{ampl}\n".encode())
+            else:
+                spec_file.write(f"{wave}{self.separator}{ampl}\n")
 
     def binary_mode(self, filename: str) -> bool:
         return False

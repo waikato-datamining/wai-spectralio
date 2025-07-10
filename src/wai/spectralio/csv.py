@@ -1,6 +1,7 @@
 import csv
 import locale
 import re
+from io import StringIO
 from typing import Type
 
 from simple_range import Index, Range
@@ -132,7 +133,12 @@ class Writer(LocaleOptionsMixin, SpectrumWriter):
         :param as_bytes: whether to write as bytes or string
         :type as_bytes: bool
         """
-        writer = csv.writer(spec_file, delimiter=self.delimiter, quoting=csv.QUOTE_MINIMAL)
+        if as_bytes:
+            buffer = StringIO()
+            writer = csv.writer(buffer, delimiter=self.delimiter, quoting=csv.QUOTE_MINIMAL)
+        else:
+            buffer = None
+            writer = csv.writer(spec_file, delimiter=self.delimiter, quoting=csv.QUOTE_MINIMAL)
 
         # ensure that all spectra have same number wave numbers
         if len(spectra) > 1:
@@ -168,6 +174,9 @@ class Writer(LocaleOptionsMixin, SpectrumWriter):
                     else:
                         row.append(None)
             writer.writerow(row)
+
+        if as_bytes:
+            spec_file.write(buffer.getvalue().encode())
 
     def _write(self, spectra, spec_file, as_bytes):
         """

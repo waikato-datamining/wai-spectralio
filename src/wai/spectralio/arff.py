@@ -166,7 +166,10 @@ class Writer(SpectrumWriter):
                         row.append(None)
             data["data"].append(row)
 
-        arff.dump(data, spec_file)
+        if as_bytes:
+            spec_file.write(arff.dumps(data).encode())
+        else:
+            arff.dump(data, spec_file)
 
     def binary_mode(self, filename: str) -> bool:
         """

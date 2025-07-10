@@ -80,7 +80,10 @@ class Writer(LocaleOptionsMixin, SpectrumWriter):
                                 f"got {len(spectra)}")
 
         for wave, amplitude in zip(spectra[0].waves, spectra[0].amplitudes):
-            spec_file.write(f"{locale.str(wave)}\t{locale.str(amplitude)}\n")
+            if as_bytes:
+                spec_file.write(f"{locale.str(wave)}\t{locale.str(amplitude)}\n".encode())
+            else:
+                spec_file.write(f"{locale.str(wave)}\t{locale.str(amplitude)}\n")
 
     @classmethod
     def get_reader_class(cls) -> Type[SpectrumReader]:

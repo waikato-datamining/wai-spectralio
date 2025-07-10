@@ -272,7 +272,10 @@ class Writer(ProductCodeOptionsMixin, LocaleOptionsMixin, SpectrumWriter):
         if len(spectra) != 1:
             raise ValueError("Writer can only write exactly 1 spectrum at a time!")
 
-        spec_file.write(self.gen_ASC_string(spectra[0]))
+        if as_bytes:
+            spec_file.write(self.gen_ASC_string(spectra[0]).encode())
+        else:
+            spec_file.write(self.gen_ASC_string(spectra[0]))
 
     def binary_mode(self, filename: str) -> bool:
         return False
